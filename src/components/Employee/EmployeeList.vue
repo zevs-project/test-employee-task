@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Card } from 'primevue'
 import DataTable from 'primevue/datatable'
-
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import type { Employee } from '@/API.ts'
+import CustomArrow from '@/components/commonComponents/CustomArrow.vue'
 
 const props = defineProps<{
   employees: Employee[]
@@ -13,7 +13,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   edit: [employee: Employee]
   remove: [id: string]
-  toggleFavourite: [employee: Employee]
+  toggleFavourite: [employee: Employee],
+  nextPage: [],
+  prevPage: []
 }>()
 
 const onPage = (event: any) => {
@@ -28,8 +30,8 @@ const onPage = (event: any) => {
       <div class="table-view">
         <DataTable
           :value="employees"
-          :paginator="true"
-          :rows="6"
+          :paginator="false"
+          :rows="3"
           dataKey="id"
           class="custom-table"
           paginatorTemplate="PrevPageLink NextPageLink"
@@ -76,6 +78,7 @@ const onPage = (event: any) => {
             </template>
           </Column>
         </DataTable>
+        <CustomArrow @next-page="emit('nextPage')" @prev-page="emit('prevPage')"></CustomArrow>
       </div>
     </template>
   </Card>

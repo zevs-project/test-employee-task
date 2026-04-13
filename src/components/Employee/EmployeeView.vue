@@ -17,11 +17,11 @@ async function createEmployee(input: CreateEmployeeInput) {
 }
 
 function showFavouritesEmployee() {
-  showFavourites.value = true;
+  showFavourites.value = true
 }
 
 function showCreateDialog() {
-  createDialogVisible.value = true;
+  createDialogVisible.value = true
 }
 
 onMounted(() => {
@@ -53,8 +53,10 @@ onUnmounted(() => {
     <EmployeeList
       :employees="employeeStore.employees"
       :positions="positions"
-      @toggle-favourite="(data) => employeeStore.toggleFavourite(data)"
-      @delete="employeeStore.removeEmployee"
+      @toggle-favourite="(data) => employeeStore.toggleFavouriteAction(data)"
+      @remove="employeeStore.removeEmployee"
+      @next-page="employeeStore.fetchNextEmployees"
+      @prev-page="employeeStore.fetchPrevEmployees"
     ></EmployeeList>
   </div>
 </template>

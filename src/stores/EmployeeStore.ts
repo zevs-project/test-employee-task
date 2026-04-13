@@ -4,8 +4,20 @@ import { useEmployee } from '@/composables/useEmployee'
 import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API'
 
 export const useEmployeeStore = defineStore('EmployeeStore', () => {
-  const { employees, getEmployees, updateFavoriteAction, deleteEmployeeAction, setEmployee, subscribeToEmployees } =
-    useEmployee()
+  const {
+    employees,
+    tokenList,
+    currentPage,
+    getEmployees,
+    updateFavoriteAction,
+    deleteEmployeeAction,
+    setEmployee,
+    getFavouritesEmployees,
+    subscribeToEmployees,
+    nextPageEmployees,
+    prevPageEmployees,
+    setTokenToList,
+  } = useEmployee()
   const isLoading = ref(false)
   const showFavourites = ref(false)
   let unsubscribe: (() => void) | null = null
@@ -13,16 +25,45 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   async function fetchEmployees() {
     isLoading.value = true
     try {
-      await getEmployees()
+      const token = await getEmployees()
+      setTokenToList('global', token || '', currentPage.value + 1)
+      console.log(tokenList.value, 'tokenList.value')
     } finally {
       isLoading.value = false
     }
   }
 
-  async function toggleFavourite(data: Employee) {
+  async function fetchNextEmployees(token?: string) {
+    isLoading.value = true
+    try {
+      await nextPageEmployees('global')
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function fetchPrevEmployees(token?: string) {
+    isLoading.value = true
+    try {
+      await prevPageEmployees('global')
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function fetchFavouritesEmployees(token?: string) {
+    isLoading.value = true
+    try {
+      await getFavouritesEmployees(token)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function toggleFavouriteAction(data: Employee) {
     const input: UpdateEmployeeInput = {
       id: data.id,
-      isFavourite: data.isFavourite === 'true' ? 'false' : 'true'
+      isFavourite: data.isFavourite === 'true' ? 'false' : 'true',
     }
     await updateFavoriteAction(input)
   }
@@ -43,38 +84,42 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     unsubscribe = subscribeToEmployees((data, type) => {
       if (type === 'CREATE') {
         // Додаємо лише якщо такого ID ще немає в списку
-        if (!employees.value.find(e => e.id === data.id)) {
-          employees.value.push(data);
+        if (!employees.value.find((e) => e.id === data.id)) {
+          employees.value.push(data)
         }
       } else if (type === 'UPDATE') {
-        const index = employees.value.findIndex(e => e.id === data.id);
-        if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
+        const index = employees.value.findIndex((e) => e.id === data.id)
+        if (index !== -1) employees.value[index] = { ...employees.value[index], ...data }
       } else if (type === 'DELETE') {
-        employees.value = employees.value.filter(e => e.id !== data.id);
+        employees.value = employees.value.filter((e) => e.id !== data.id)
       }
-    });
+    })
   }
 
   function stopSubscriptions() {
     if (unsubscribe) {
-      unsubscribe();
-      unsubscribe = null;
+      unsubscribe()
+      unsubscribe = null
     }
   }
 
   function toggleFavourites() {
-    showFavourites.value = !showFavourites.value;
+    showFavourites.value = !showFavourites.value
   }
+
+
 
   return {
     employees,
     isLoading,
     showFavourites,
     fetchEmployees,
-    toggleFavourite,
+    toggleFavouriteAction,
     removeEmployee,
     createEmployee,
     initSubscriptions,
-    stopSubscriptions
+    stopSubscriptions,
+    fetchNextEmployees,
+    fetchPrevEmployees,
   }
 })
