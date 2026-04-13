@@ -8,138 +8,12 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onCreatePosition = /* GraphQL */ `subscription OnCreatePosition($filter: ModelSubscriptionPositionFilterInput) {
-  onCreatePosition(filter: $filter) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreatePositionSubscriptionVariables,
-  APITypes.OnCreatePositionSubscription
->;
-export const onUpdatePosition = /* GraphQL */ `subscription OnUpdatePosition($filter: ModelSubscriptionPositionFilterInput) {
-  onUpdatePosition(filter: $filter) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdatePositionSubscriptionVariables,
-  APITypes.OnUpdatePositionSubscription
->;
-export const onDeletePosition = /* GraphQL */ `subscription OnDeletePosition($filter: ModelSubscriptionPositionFilterInput) {
-  onDeletePosition(filter: $filter) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeletePositionSubscriptionVariables,
-  APITypes.OnDeletePositionSubscription
->;
 export const onCreateEmployee = /* GraphQL */ `subscription OnCreateEmployee($filter: ModelSubscriptionEmployeeFilterInput) {
   onCreateEmployee(filter: $filter) {
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename
@@ -154,28 +28,7 @@ export const onUpdateEmployee = /* GraphQL */ `subscription OnUpdateEmployee($fi
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename
@@ -190,28 +43,7 @@ export const onDeleteEmployee = /* GraphQL */ `subscription OnDeleteEmployee($fi
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename

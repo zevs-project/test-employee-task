@@ -1,39 +1,25 @@
 <script setup lang="ts">
 import { Card, Select, InputText, Button } from 'primevue'
 import { computed, ref } from 'vue'
-import type { CreateEmployeeInput, Position } from '@/API'
+import type { CreateEmployeeInput } from '@/API'
+import type { TPosition, TPositionKeys } from '@/types/TPosition.ts'
 
-const props = defineProps<{
-  positions: Position[]
+defineProps<{
+  positions: TPosition
 }>()
 
 const emit = defineEmits<{
   (e: 'employeeCreated', employee: CreateEmployeeInput): void
 }>()
 
-const selectedPosition = ref('')
+const selectedPosition = ref<TPositionKeys | ''>('')
 const employeeName = ref('')
 
-const filteredPosition = computed(() => {
-  return props.positions.map((position) => position.title)
-})
-
-const positionId = computed((): string => {
-  if (!selectedPosition.value) return ''
-  const found = props.positions.find((p) => p.title === selectedPosition.value)
-  return found ? found.id : ''
-})
-
 async function setEmployee() {
-  if (!positionId.value || !employeeName.value) {
-    console.warn('Position and Name are required')
-    return
-  }
-
   const employee: CreateEmployeeInput = {
     name: employeeName.value,
     isFavourite: 'false',
-    positionId: positionId.value,
+    position: selectedPosition.value as string,
   }
 
   employeeName.value = ''
@@ -48,7 +34,7 @@ async function setEmployee() {
     <template #content>
       <div style="display: flex; flex-direction: column; gap: 1rem">
         <Select
-          :options="filteredPosition"
+          :options="positions"
           v-model="selectedPosition"
           placeholder="Select Position"
         ></Select>

@@ -8,103 +8,12 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
-export const getPosition = /* GraphQL */ `query GetPosition($id: ID!) {
-  getPosition(id: $id) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetPositionQueryVariables,
-  APITypes.GetPositionQuery
->;
-export const listPositions = /* GraphQL */ `query ListPositions(
-  $filter: ModelPositionFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listPositions(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListPositionsQueryVariables,
-  APITypes.ListPositionsQuery
->;
 export const getEmployee = /* GraphQL */ `query GetEmployee($id: ID!) {
   getEmployee(id: $id) {
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename
@@ -124,19 +33,7 @@ export const listEmployees = /* GraphQL */ `query ListEmployees(
       id
       name
       isFavourite
-      positionId
-      position {
-        id
-        title
-        icon
-        employees {
-          nextToken
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
+      position
       createdAt
       updatedAt
       __typename
@@ -167,19 +64,7 @@ export const employeesByName = /* GraphQL */ `query EmployeesByName(
       id
       name
       isFavourite
-      positionId
-      position {
-        id
-        title
-        icon
-        employees {
-          nextToken
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
+      position
       createdAt
       updatedAt
       __typename
@@ -210,19 +95,7 @@ export const employeesByFavourite = /* GraphQL */ `query EmployeesByFavourite(
       id
       name
       isFavourite
-      positionId
-      position {
-        id
-        title
-        icon
-        employees {
-          nextToken
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
+      position
       createdAt
       updatedAt
       __typename
@@ -234,47 +107,4 @@ export const employeesByFavourite = /* GraphQL */ `query EmployeesByFavourite(
 ` as GeneratedQuery<
   APITypes.EmployeesByFavouriteQueryVariables,
   APITypes.EmployeesByFavouriteQuery
->;
-export const employeesByPositionId = /* GraphQL */ `query EmployeesByPositionId(
-  $positionId: ID!
-  $sortDirection: ModelSortDirection
-  $filter: ModelEmployeeFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  employeesByPositionId(
-    positionId: $positionId
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      name
-      isFavourite
-      positionId
-      position {
-        id
-        title
-        icon
-        employees {
-          nextToken
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.EmployeesByPositionIdQueryVariables,
-  APITypes.EmployeesByPositionIdQuery
 >;

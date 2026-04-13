@@ -1,0 +1,40 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import InputText from 'primevue/inputtext'
+import { Button } from 'primevue'
+
+const searchText = ref('')
+const addButtonLabel = 'Add new'
+const showFavouritesButtonLabel = 'Show favourites'
+
+const emit = defineEmits<{
+  (e: 'addEmployee'): void
+  (e: 'showFavouritesEmployee'): void
+}>()
+
+function emitAddEmployee() {
+  emit('addEmployee')
+}
+
+function emitShowFavouritesEmployee() {
+  emit('showFavouritesEmployee')
+}
+</script>
+
+<template>
+  <div class="employee-top-menu">
+    <InputText id="searchText" placeholder="Search user" v-model="searchText" />
+
+    <Button :label="showFavouritesButtonLabel" @click="emitShowFavouritesEmployee"></Button>
+
+    <Button :label="addButtonLabel" @click="emitAddEmployee"></Button>
+  </div>
+</template>
+
+<style scoped>
+.employee-top-menu {
+  gap: 10px 30px;
+  display: flex;
+  justify-content: flex-start;
+}
+</style>

@@ -8,120 +8,6 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createPosition = /* GraphQL */ `mutation CreatePosition(
-  $input: CreatePositionInput!
-  $condition: ModelPositionConditionInput
-) {
-  createPosition(input: $input, condition: $condition) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreatePositionMutationVariables,
-  APITypes.CreatePositionMutation
->;
-export const updatePosition = /* GraphQL */ `mutation UpdatePosition(
-  $input: UpdatePositionInput!
-  $condition: ModelPositionConditionInput
-) {
-  updatePosition(input: $input, condition: $condition) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdatePositionMutationVariables,
-  APITypes.UpdatePositionMutation
->;
-export const deletePosition = /* GraphQL */ `mutation DeletePosition(
-  $input: DeletePositionInput!
-  $condition: ModelPositionConditionInput
-) {
-  deletePosition(input: $input, condition: $condition) {
-    id
-    title
-    icon
-    employees {
-      items {
-        id
-        name
-        isFavourite
-        positionId
-        position {
-          id
-          title
-          icon
-          createdAt
-          updatedAt
-          __typename
-        }
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeletePositionMutationVariables,
-  APITypes.DeletePositionMutation
->;
 export const createEmployee = /* GraphQL */ `mutation CreateEmployee(
   $input: CreateEmployeeInput!
   $condition: ModelEmployeeConditionInput
@@ -130,28 +16,7 @@ export const createEmployee = /* GraphQL */ `mutation CreateEmployee(
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename
@@ -169,28 +34,7 @@ export const updateEmployee = /* GraphQL */ `mutation UpdateEmployee(
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename
@@ -208,28 +52,7 @@ export const deleteEmployee = /* GraphQL */ `mutation DeleteEmployee(
     id
     name
     isFavourite
-    positionId
-    position {
-      id
-      title
-      icon
-      employees {
-        items {
-          id
-          name
-          isFavourite
-          positionId
-          createdAt
-          updatedAt
-          __typename
-        }
-        nextToken
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
+    position
     createdAt
     updatedAt
     __typename

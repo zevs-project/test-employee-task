@@ -7,6 +7,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   const { employees, getEmployees, updateFavoriteAction, deleteEmployeeAction, setEmployee, subscribeToEmployees } =
     useEmployee()
   const isLoading = ref(false)
+  const showFavourites = ref(false)
   let unsubscribe: (() => void) | null = null
 
   async function fetchEmployees() {
@@ -61,9 +62,14 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     }
   }
 
+  function toggleFavourites() {
+    showFavourites.value = !showFavourites.value;
+  }
+
   return {
     employees,
     isLoading,
+    showFavourites,
     fetchEmployees,
     toggleFavourite,
     removeEmployee,

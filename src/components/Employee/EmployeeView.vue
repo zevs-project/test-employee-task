@@ -1,0 +1,62 @@
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue'
+import type { CreateEmployeeInput } from '@/API'
+import { useEmployeeStore } from '@/stores/EmployeeStore'
+import { EmployeeList, EmployeeCreate, EmployeeTopMenu } from '@/components/Employee/index'
+import type { TPosition } from '@/types/TPosition'
+import Dialog from 'primevue/dialog'
+
+defineProps<{ positions: TPosition }>()
+
+const employeeStore = useEmployeeStore()
+const createDialogVisible = ref(false)
+const showFavourites = ref(false)
+
+async function createEmployee(input: CreateEmployeeInput) {
+  await employeeStore.createEmployee(input)
+}
+
+function showFavouritesEmployee() {
+  showFavourites.value = true;
+}
+
+function showCreateDialog() {
+  createDialogVisible.value = true;
+}
+
+onMounted(() => {
+  employeeStore.fetchEmployees()
+  employeeStore.initSubscriptions()
+})
+
+onUnmounted(() => {
+  employeeStore.stopSubscriptions()
+})
+</script>
+
+<template>
+  <div class="employee-view">
+    <EmployeeTopMenu
+      @show-favourites-employee="showFavouritesEmployee"
+      @add-employee="showCreateDialog"
+    ></EmployeeTopMenu>
+
+    <Dialog
+      v-model:visible="createDialogVisible"
+      modal
+      header="Edit Profile"
+      :style="{ width: '25rem' }"
+    >
+      <EmployeeCreate :positions="positions" @employee-created="createEmployee"></EmployeeCreate>
+    </Dialog>
+
+    <EmployeeList
+      :employees="employeeStore.employees"
+      :positions="positions"
+      @toggle-favourite="(data) => employeeStore.toggleFavourite(data)"
+      @delete="employeeStore.removeEmployee"
+    ></EmployeeList>
+  </div>
+</template>
+
+<style scoped></style>
