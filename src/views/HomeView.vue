@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Authenticator } from '@aws-amplify/ui-vue'
-import '@aws-amplify/ui-vue/styles.css'
-import { Button } from 'primevue'
-import 'primeicons/primeicons.css'
-import { EmployeeView } from '@/components/Employee/index'
+import { Authenticator } from '@aws-amplify/ui-vue';
+import '@aws-amplify/ui-vue/styles.css';
+import { Button } from 'primevue';
+import 'primeicons/primeicons.css';
+import { EmployeeView } from '@/components/Employee/index';
 
-import type { TPosition } from '@/types/TPosition.ts'
+import type { TPosition } from '@/types/TPosition.ts';
 
-const positions: TPosition = ['Developer', 'PM', 'Delivery', 'TL']
+const positions: TPosition = ['Developer', 'PM', 'Delivery', 'TL'];
 </script>
 
 <template>

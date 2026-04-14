@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { Card, Select, InputText, Button } from 'primevue'
-import { computed, ref } from 'vue'
-import type { CreateEmployeeInput } from '@/API'
-import type { TPosition, TPositionKeys } from '@/types/TPosition.ts'
+import { Card, Select, InputText, Button } from 'primevue';
+import { computed, ref } from 'vue';
+import type { CreateEmployeeInput } from '@/API';
+import type { TPosition, TPositionKeys } from '@/types/TPosition.ts';
 
 defineProps<{
   positions: TPosition
-}>()
+}>();
 
 const emit = defineEmits<{
   (e: 'employeeCreated', employee: CreateEmployeeInput): void
-}>()
+}>();
 
-const selectedPosition = ref<TPositionKeys | ''>('')
-const employeeName = ref('')
+const selectedPosition = ref<TPositionKeys | ''>('');
+const employeeName = ref('');
 
 async function setEmployee() {
   const employee: CreateEmployeeInput = {
     name: employeeName.value,
     isFavourite: 'false',
-    position: selectedPosition.value as string,
-  }
+    position: selectedPosition.value as string
+  };
 
-  employeeName.value = ''
-  selectedPosition.value = ''
-  emit('employeeCreated', employee)
+  employeeName.value = '';
+  selectedPosition.value = '';
+  emit('employeeCreated', employee);
 }
 </script>
 

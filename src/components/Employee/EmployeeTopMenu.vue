@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import InputText from 'primevue/inputtext'
-import { Button } from 'primevue'
+import { ref } from 'vue';
+import InputText from 'primevue/inputtext';
+import { Button } from 'primevue';
 
-const searchText = ref('')
-const addButtonLabel = 'Add new'
-const showFavouritesButtonLabel = 'Show favourites'
+const searchText = ref('');
+const addButtonLabel = 'Add new';
+const showFavouritesButtonLabel = 'Show favourites';
 
 const emit = defineEmits<{
   (e: 'addEmployee'): void
   (e: 'showFavouritesEmployee'): void
-}>()
+}>();
 
 function emitAddEmployee() {
-  emit('addEmployee')
+  emit('addEmployee');
 }
 
 function emitShowFavouritesEmployee() {
-  emit('showFavouritesEmployee')
+  emit('showFavouritesEmployee');
 }
 </script>
 

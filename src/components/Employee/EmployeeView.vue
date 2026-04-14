@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
-import type { CreateEmployeeInput } from '@/API'
-import { useEmployeeStore } from '@/stores/EmployeeStore'
-import { EmployeeList, EmployeeCreate, EmployeeTopMenu } from '@/components/Employee/index'
-import type { TPosition } from '@/types/TPosition'
-import Dialog from 'primevue/dialog'
+import { onMounted, onUnmounted, ref } from 'vue';
+import type { CreateEmployeeInput } from '@/API';
+import { useEmployeeStore } from '@/stores/EmployeeStore';
+import { EmployeeList, EmployeeCreate, EmployeeTopMenu } from '@/components/Employee/index';
+import type { TPosition } from '@/types/TPosition';
+import Dialog from 'primevue/dialog';
 
-defineProps<{ positions: TPosition }>()
+defineProps<{ positions: TPosition }>();
 
-const employeeStore = useEmployeeStore()
-const createDialogVisible = ref(false)
-const showFavourites = ref(false)
+const employeeStore = useEmployeeStore();
+const createDialogVisible = ref(false);
+const showFavourites = ref(false);
 
 async function createEmployee(input: CreateEmployeeInput) {
-  await employeeStore.createEmployee(input)
+  await employeeStore.createEmployee(input);
 }
 
 function showFavouritesEmployee() {
-  showFavourites.value = true
+  showFavourites.value = true;
 }
 
 function showCreateDialog() {
-  createDialogVisible.value = true
+  createDialogVisible.value = true;
 }
 
 onMounted(() => {
-  employeeStore.fetchEmployees()
-  employeeStore.initSubscriptions()
-})
+  employeeStore.fetchEmployees();
+  employeeStore.initSubscriptions();
+});
 
 onUnmounted(() => {
-  employeeStore.stopSubscriptions()
-})
+  employeeStore.stopSubscriptions();
+});
 </script>
 
 <template>

@@ -1,9 +1,10 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import { Amplify } from 'aws-amplify'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { Amplify } from 'aws-amplify';
 import amplifyconfig from './amplifyconfiguration.json';
+
 Amplify.configure(amplifyconfig);
 
 import App from './App.vue';
@@ -20,9 +21,9 @@ app.use(PrimeVue, {
     preset: Aura, // Встановлюємо пресет Aura
     options: {
       darkModeSelector: '.my-app-dark', // Селектор для темної теми (необов'язково)
-      cssLayer: false, // Якщо використовуєте Tailwind, краще поставити true
-    },
-  },
-})
+      cssLayer: false // Якщо використовуєте Tailwind, краще поставити true
+    }
+  }
+});
 
-app.mount('#app')
+app.mount('#app');

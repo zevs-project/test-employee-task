@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Card } from 'primevue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
-import type { Employee } from '@/API.ts'
-import CustomArrow from '@/components/commonComponents/CustomArrow.vue'
+import { Card } from 'primevue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button';
+import type { Employee } from '@/API.ts';
+import CustomArrow from '@/components/commonComponents/CustomArrow.vue';
 
 const props = defineProps<{
   employees: Employee[]
-}>()
+}>();
 
 const emit = defineEmits<{
   edit: [employee: Employee]
@@ -16,11 +16,11 @@ const emit = defineEmits<{
   toggleFavourite: [employee: Employee],
   nextPage: [],
   prevPage: []
-}>()
+}>();
 
 const onPage = (event: any) => {
-  console.log('Pagination changed:', event)
-}
+  console.log('Pagination changed:', event);
+};
 </script>
 
 <template>
