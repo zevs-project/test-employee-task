@@ -89,12 +89,26 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       if (type === 'CREATE' || type === 'DELETE') {
         const nextToken = getPageToken(currentPage.value);
         const token = await getEmployees(nextToken);
-        setCurrentPage(currentPage.value + 1);
-        setTokenToList(token, currentPage.value + 1);
+
+        if (token !== null) {
+          setTokenToList(token, currentPage.value + 1);
+        }
+        // setCurrentPage(currentPage.value);
+        // setTokenToList(token, currentPage.value);
         await fetchEmployees(nextToken);
       } else if (type === 'UPDATE') {
         const index = employees.value.findIndex((e) => e.id === data.id);
         if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
+      } else if (type === 'DELETE') {
+        const nextToken = getPageToken(currentPage.value);
+        const token = await getEmployees(nextToken);
+
+        if (token !== null) {
+          setTokenToList(token, currentPage.value + 1);
+        }
+        setCurrentPage(currentPage.value);
+        // setTokenToList(token, currentPage.value);
+        await fetchEmployees(nextToken);
       }
     });
   }
@@ -110,7 +124,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     showFavourites.value = !showFavourites.value;
   }
 
-  watch(tokenList,  (newTokenList) => {
+  watch(tokenList, (newTokenList) => {
     const nextPageNumber = currentPage.value + 1;
     const prevPageNumber = currentPage.value - 1;
     const tokenNextPage = getPageToken(nextPageNumber);
@@ -118,10 +132,10 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = currentPage.value > 1;
   }, {
-    immediate: true,
+    immediate: true
   });
 
-  watch(currentPage,  (newCurrentPage) => {
+  watch(currentPage, (newCurrentPage) => {
     const nextPageNumber = currentPage.value + 1;
     const prevPageNumber = currentPage.value - 1;
     const tokenNextPage = getPageToken(nextPageNumber);
@@ -129,7 +143,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = newCurrentPage > 1;
   }, {
-    immediate: true,
+    immediate: true
   });
   return {
     employees,
