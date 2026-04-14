@@ -44,8 +44,6 @@ export function useEmployee() {
       const nextToken = getPageToken(page);
       const token = await getEmployees(nextToken);
 
-      console.log(page, tokenList.value, nextToken, token, 'page');
-
       if (nextToken) {
         setCurrentPage(page);
         setTokenToList(token, page + 1);
@@ -55,7 +53,6 @@ export function useEmployee() {
   }
 
   async function prevPageEmployees() {
-    console.log('prevPageEmployees');
     if (tokenList.value !== null) {
       const page = currentPage.value - 1 <= 0 ? 1 : currentPage.value - 1;
       const nextToken = page > 1 ? getPageToken(page) : null;
@@ -94,8 +91,6 @@ export function useEmployee() {
         });
       }
     }
-
-    console.log(tokenList.value, 'setTokenToList');
   }
 
   async function getFavouritesEmployees(token?: string) {
@@ -104,7 +99,6 @@ export function useEmployee() {
       variables: { limit: queryLimit, isFavourite: 'true', nextToken: token }
     })) as any;
 
-    console.log(response, 'response');
     const items = response.data.listEmployees.items || [];
     employees.value = items.filter((item: Employee): item is Employee => !!item);
   }
@@ -155,15 +149,6 @@ export function useEmployee() {
   function setCurrentPage(value: number) {
     currentPage.value = value;
   }
-
-  /* watch(employees, (newEmployees) => {
-     console.log('watch emp', newEmployees);
-   });*/
-
-  watch(tokenList, (newTokenList) => {
-    console.log('watch token list', newTokenList);
-  });
-
 
   return {
     employees,
