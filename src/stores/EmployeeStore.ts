@@ -110,14 +110,40 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     showFavourites.value = !showFavourites.value;
   }
 
-  watch(tokenList, (newTokenNextPage) => {
+  /*watch(tokenList, (newTokenNextPage) => {
     console.log(tokenList.value, 'tokenList ');
     const nextPageNumber = currentPage.value + 1;
     const prevPageNumber = currentPage.value - 1;
     const tokenNextPage = getPageToken(nextPageNumber);
     const tokenPrevPage = getPageToken(prevPageNumber);
     isNextActive.value = !!tokenNextPage;
+    // isPrevActive.value = currentPage.value <= 1;
+  });*/
+
+  watch(tokenList,  (newTokenList) => {
+    const nextPageNumber = currentPage.value + 1;
+    const prevPageNumber = currentPage.value - 1;
+    const tokenNextPage = getPageToken(nextPageNumber);
+    const tokenPrevPage = getPageToken(prevPageNumber);
+    isNextActive.value = !!tokenNextPage;
     isPrevActive.value = currentPage.value > 1;
+
+    console.log(isPrevActive.value, 'isPrevActive.value');
+  }, {
+    immediate: true,
+  });
+
+  watch(currentPage,  (newCurrentPage) => {
+    const nextPageNumber = currentPage.value + 1;
+    const prevPageNumber = currentPage.value - 1;
+    const tokenNextPage = getPageToken(nextPageNumber);
+    const tokenPrevPage = getPageToken(prevPageNumber);
+    isNextActive.value = !!tokenNextPage;
+    isPrevActive.value = newCurrentPage > 1;
+
+    console.log(isPrevActive.value, 'isPrevActive.value');
+  }, {
+    immediate: true,
   });
   return {
     employees,

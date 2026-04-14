@@ -20,7 +20,10 @@ export function useEmployee() {
     })) as any;
 
     const items = response.data.listEmployees.items || [];
-    employees.value = items.filter((item: Employee): item is Employee => !!item);
+    if (items.length > 0) {
+      employees.value = items.filter((item: Employee): item is Employee => !!item);
+    }
+
     return response.data.listEmployees.nextToken ?? null;
   }
 
@@ -32,7 +35,6 @@ export function useEmployee() {
       )?.nextToken : null;
       return nextToken ? nextToken : null;
     }
-
     return null;
   }
 
@@ -40,10 +42,15 @@ export function useEmployee() {
     if (tokenList.value !== null) {
       const page = currentPage.value + 1;
       const nextToken = getPageToken(page);
-
       const token = await getEmployees(nextToken);
-      setCurrentPage(page);
-      setTokenToList(token, page);
+
+      console.log(page, tokenList.value, nextToken, token, 'page');
+
+      if (nextToken) {
+        setCurrentPage(page);
+        setTokenToList(token, page + 1);
+      }
+
     }
   }
 
@@ -55,7 +62,7 @@ export function useEmployee() {
 
       const token = await getEmployees(nextToken);
       setCurrentPage(page);
-      setTokenToList(token, page);
+      // setTokenToList(token, page);
     }
   }
 
@@ -87,6 +94,8 @@ export function useEmployee() {
         });
       }
     }
+
+    console.log(tokenList.value, 'setTokenToList');
   }
 
   async function getFavouritesEmployees(token?: string) {
@@ -147,9 +156,9 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
- /* watch(employees, (newEmployees) => {
-    console.log('watch emp', newEmployees);
-  });*/
+  /* watch(employees, (newEmployees) => {
+     console.log('watch emp', newEmployees);
+   });*/
 
   watch(tokenList, (newTokenList) => {
     console.log('watch token list', newTokenList);
