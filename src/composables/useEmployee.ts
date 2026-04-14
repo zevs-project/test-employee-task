@@ -13,7 +13,7 @@ export function useEmployee() {
   const currentPage = ref(1);
   const tokenType = ref<TTokenType>('global');
 
-  async function getEmployees(token: string | null): Promise<string> {
+  async function getEmployees(token: string | null): Promise<string | null> {
     const response = (await API.graphql({
       query: listEmployees,
       variables: { limit: queryLimit, nextToken: token }
@@ -21,10 +21,10 @@ export function useEmployee() {
 
     const items = response.data.listEmployees.items || [];
     employees.value = items.filter((item: Employee): item is Employee => !!item);
-    return response.data.listEmployees.nextToken || '';
+    return response.data.listEmployees.nextToken ?? null;
   }
 
-  function getCurrentPageToken(page: number): string | null {
+  function getPageToken(page: number): string | null {
     if (tokenList.value !== null && tokenList.value?.[tokenType.value]) {
       const currentTokenType = tokenList.value?.[tokenType.value];
       const nextToken = currentTokenType ? currentTokenType.find(
@@ -36,48 +36,56 @@ export function useEmployee() {
     return null;
   }
 
-  async function nextPageEmployees(tokenType: TTokenType) {
+  async function nextPageEmployees() {
     if (tokenList.value !== null) {
-      const nextToken = getCurrentPageToken(currentPage.value + 1);
+      const page = currentPage.value + 1;
+      const nextToken = getPageToken(page);
 
       const token = await getEmployees(nextToken);
-      setCurrentPage(currentPage.value + 1);
-      setTokenToList(tokenType, token, currentPage.value + 1);
+      setCurrentPage(page);
+      setTokenToList(token, page);
     }
   }
 
-  async function prevPageEmployees(tokenType: TTokenType) {
+  async function prevPageEmployees() {
+    console.log('prevPageEmployees');
     if (tokenList.value !== null) {
-      const nextToken = getCurrentPageToken(currentPage.value + 1);
+      const page = currentPage.value - 1 <= 0 ? 1 : currentPage.value - 1;
+      const nextToken = page > 1 ? getPageToken(page) : null;
 
       const token = await getEmployees(nextToken);
-      setCurrentPage(currentPage.value - 1);
-      setTokenToList(tokenType, token, currentPage.value - 1);
+      setCurrentPage(page);
+      setTokenToList(token, page);
     }
   }
 
-  function setTokenToList(tokenType: TTokenType, token: string, page: number) {
+  function setTokenToList(token: string | null, page: number) {
     if (!tokenList.value) {
       tokenList.value = {};
     }
 
-    if (!tokenList.value[tokenType]) {
-      tokenList.value[tokenType] = [];
-    }
+    const tokenTypeList = tokenList.value[tokenType.value];
 
-    const pageIndex = tokenList.value[tokenType].findIndex((elem) => elem.page === page);
-
-    if (
-      pageIndex !== -1 &&
-      tokenList.value[tokenType] !== undefined &&
-      tokenList.value[tokenType][pageIndex] !== undefined
-    ) {
-      tokenList.value[tokenType][pageIndex].nextToken = token;
-    } else {
-      tokenList.value[tokenType]!.push({
+    if (!tokenTypeList) {
+      tokenList.value[tokenType.value] = [];
+      tokenList.value[tokenType.value]!.push({
         nextToken: token,
         page
       });
+    } else {
+      const pageIndex = tokenTypeList.findIndex((elem) => elem.page === page);
+
+      if (
+        pageIndex !== -1 &&
+        tokenTypeList[pageIndex] !== undefined
+      ) {
+        tokenTypeList[pageIndex].nextToken = token;
+      } else {
+        tokenList.value[tokenType.value]!.push({
+          nextToken: token,
+          page
+        });
+      }
     }
   }
 
@@ -139,9 +147,14 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
-  watch(employees, (newEmployees) => {
+ /* watch(employees, (newEmployees) => {
     console.log('watch emp', newEmployees);
+  });*/
+
+  watch(tokenList, (newTokenList) => {
+    console.log('watch token list', newTokenList);
   });
+
 
   return {
     employees,
@@ -156,7 +169,7 @@ export function useEmployee() {
     prevPageEmployees,
     nextPageEmployees,
     setTokenToList,
-    getCurrentPageToken,
+    getPageToken,
     setCurrentPage
   };
 }

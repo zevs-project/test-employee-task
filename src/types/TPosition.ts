@@ -5,7 +5,7 @@ export type TPositionKeys = keyof TPosition;
 export type TTokenType = 'global' | 'isFavourite';
 
 export interface INextToken {
-  nextToken: string,
+  nextToken: string | null,
   page: number
 }
 

@@ -25,7 +25,7 @@ function showCreateDialog() {
 }
 
 onMounted(() => {
-  employeeStore.fetchEmployees();
+  employeeStore.fetchEmployees(null);
   employeeStore.initSubscriptions();
 });
 

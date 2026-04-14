@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, computed, watch, watchEffect } from 'vue';
 import { defineStore } from 'pinia';
 import { useEmployee } from '@/composables/useEmployee';
 import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
@@ -6,8 +6,8 @@ import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
 export const useEmployeeStore = defineStore('EmployeeStore', () => {
   const {
     employees,
-    tokenList,
     currentPage,
+    tokenList,
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
@@ -17,18 +17,21 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     nextPageEmployees,
     prevPageEmployees,
     setTokenToList,
-    getCurrentPageToken,
+    getPageToken,
     setCurrentPage
   } = useEmployee();
   const isLoading = ref(false);
   const showFavourites = ref(false);
   let unsubscribe: (() => void) | null = null;
 
+  const isNextActive = ref(true);
+  const isPrevActive = ref(true);
+
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
     try {
       const nextPageToken = await getEmployees(token);
-      setTokenToList('global', nextPageToken || '', currentPage.value + 1);
+      setTokenToList(nextPageToken || '', currentPage.value + 1);
     } finally {
       isLoading.value = false;
     }
@@ -37,7 +40,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   async function fetchNextEmployees() {
     isLoading.value = true;
     try {
-      await nextPageEmployees('global');
+      await nextPageEmployees();
     } finally {
       isLoading.value = false;
     }
@@ -46,7 +49,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   async function fetchPrevEmployees() {
     isLoading.value = true;
     try {
-      await prevPageEmployees('global');
+      await prevPageEmployees();
     } finally {
       isLoading.value = false;
     }
@@ -82,22 +85,16 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   function initSubscriptions() {
     if (unsubscribe) return;
 
-    unsubscribe = subscribeToEmployees((data, type) => {
-      if (type === 'CREATE') {
-        if (!employees.value.find((e) => e.id === data.id)) {
-          employees.value.push(data);
-        }
-        const nextToken = getCurrentPageToken(tokenType, currentPage.value + 1);
-
-        const token = getEmployees(nextToken);
+    unsubscribe = subscribeToEmployees(async (data, type) => {
+      if (type === 'CREATE' || type === 'DELETE') {
+        const nextToken = getPageToken(currentPage.value);
+        const token = await getEmployees(nextToken);
         setCurrentPage(currentPage.value + 1);
-        setTokenToList(tokenType, token, currentPage.value + 1);
-        fetchEmployees(nextToken);
+        setTokenToList(token, currentPage.value + 1);
+        await fetchEmployees(nextToken);
       } else if (type === 'UPDATE') {
         const index = employees.value.findIndex((e) => e.id === data.id);
         if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
-      } else if (type === 'DELETE') {
-        employees.value = employees.value.filter((e) => e.id !== data.id);
       }
     });
   }
@@ -113,10 +110,22 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     showFavourites.value = !showFavourites.value;
   }
 
+  watch(tokenList, (newTokenNextPage) => {
+    console.log(tokenList.value, 'tokenList ');
+    const nextPageNumber = currentPage.value + 1;
+    const prevPageNumber = currentPage.value - 1;
+    const tokenNextPage = getPageToken(nextPageNumber);
+    const tokenPrevPage = getPageToken(prevPageNumber);
+    isNextActive.value = !!tokenNextPage;
+    isPrevActive.value = currentPage.value > 1;
+  });
   return {
     employees,
     isLoading,
     showFavourites,
+    currentPage,
+    isNextActive,
+    isPrevActive,
     fetchEmployees,
     toggleFavouriteAction,
     removeEmployee,
