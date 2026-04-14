@@ -11,14 +11,15 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
-    setEmployee,
+    createEmployeeAction,
     getFavouritesEmployees,
     subscribeToEmployees,
     nextPageEmployees,
     prevPageEmployees,
     setTokenToList,
     getPageToken,
-    setCurrentPage
+    setCurrentPage,
+    setEmployee
   } = useEmployee();
   const isLoading = ref(false);
   const showFavourites = ref(false);
@@ -30,8 +31,13 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
     try {
-      const nextPageToken = await getEmployees(token);
-      setTokenToList(nextPageToken || '', currentPage.value + 1);
+      const res = await getEmployees(token);
+      if (res !== null) {
+        const { items, nextToken } = res;
+        setEmployee(items);
+        setTokenToList(nextToken, currentPage.value + 1);
+      }
+
     } finally {
       isLoading.value = false;
     }
@@ -77,38 +83,47 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     await deleteEmployeeAction(id);
   }
 
-  async function createEmployee(input: CreateEmployeeInput) {
+  async function addEmployeeAction(input: CreateEmployeeInput) {
     if (!input.isFavourite) input.isFavourite = 'false';
-    await setEmployee(input);
+    await createEmployeeAction(input);
   }
 
   function initSubscriptions() {
     if (unsubscribe) return;
 
     unsubscribe = subscribeToEmployees(async (data, type) => {
-      if (type === 'CREATE' || type === 'DELETE') {
-        const nextToken = getPageToken(currentPage.value);
-        const token = await getEmployees(nextToken);
+      if (type === 'CREATE') {
+        const currPageToken = getPageToken(currentPage.value);
+        const res = await getEmployees(currPageToken);
 
-        if (token !== null) {
-          setTokenToList(token, currentPage.value + 1);
+        if (res !== null) {
+          const { items, nextToken } = res;
+          setEmployee(items);
+          setTokenToList(nextToken, currentPage.value + 1);
+          setTokenToList(nextToken, currentPage.value);
         }
         // setCurrentPage(currentPage.value);
-        // setTokenToList(token, currentPage.value);
-        await fetchEmployees(nextToken);
+
       } else if (type === 'UPDATE') {
         const index = employees.value.findIndex((e) => e.id === data.id);
         if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
       } else if (type === 'DELETE') {
-        const nextToken = getPageToken(currentPage.value);
-        const token = await getEmployees(nextToken);
+        const currPageToken = getPageToken(currentPage.value);
+        const res = await getEmployees(currPageToken);
 
-        if (token !== null) {
-          setTokenToList(token, currentPage.value + 1);
+        if (res !== null) {
+          const { items, nextToken } = res;
+          const prevPageNextToken = getPageToken(currentPage.value - 1);
+          const prevPageToken = await getEmployees(prevPageNextToken);
+
+          console.log(tokenList.value, 'ssdfsf');
+
+          if (prevPageToken === null && currentPage.value !== 1) {
+            setCurrentPage(currentPage.value - 1);
+            setTokenToList(prevPageToken, currentPage.value);
+          }
         }
-        setCurrentPage(currentPage.value);
-        // setTokenToList(token, currentPage.value);
-        await fetchEmployees(nextToken);
+
       }
     });
   }
@@ -126,9 +141,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
   watch(tokenList, (newTokenList) => {
     const nextPageNumber = currentPage.value + 1;
-    const prevPageNumber = currentPage.value - 1;
     const tokenNextPage = getPageToken(nextPageNumber);
-    const tokenPrevPage = getPageToken(prevPageNumber);
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = currentPage.value > 1;
   }, {
@@ -137,14 +150,19 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
   watch(currentPage, (newCurrentPage) => {
     const nextPageNumber = currentPage.value + 1;
-    const prevPageNumber = currentPage.value - 1;
     const tokenNextPage = getPageToken(nextPageNumber);
-    const tokenPrevPage = getPageToken(prevPageNumber);
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = newCurrentPage > 1;
   }, {
     immediate: true
   });
+
+  watch(tokenList, () => {
+    console.log(tokenList.value, 'token list');
+  }, {
+    immediate: true
+  });
+
   return {
     employees,
     isLoading,
@@ -155,7 +173,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     fetchEmployees,
     toggleFavouriteAction,
     removeEmployee,
-    createEmployee,
+    addEmployeeAction,
     initSubscriptions,
     stopSubscriptions,
     fetchNextEmployees,

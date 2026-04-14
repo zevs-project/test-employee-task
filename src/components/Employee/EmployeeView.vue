@@ -13,7 +13,7 @@ const createDialogVisible = ref(false);
 const showFavourites = ref(false);
 
 async function createEmployee(input: CreateEmployeeInput) {
-  await employeeStore.createEmployee(input);
+  await employeeStore.addEmployeeAction(input);
 }
 
 function showFavouritesEmployee() {

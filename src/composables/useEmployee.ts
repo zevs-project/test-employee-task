@@ -1,10 +1,11 @@
-import { type Ref, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { CreateEmployeeInput, Employee, UpdateEmployeeInput, DeleteEmployeeInput } from '@/API';
 import { employeesByFavourite, listEmployees } from '@/graphql/queries.ts';
 import { updateEmployee, deleteEmployee, createEmployee } from '@/graphql/mutations';
 import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/subscriptions';
 import { API, graphqlOperation } from 'aws-amplify';
 import type { TokensMap, TTokenType } from '@/types/TPosition.ts';
+import type { IEmployee } from '@/types/TEmployee';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
@@ -13,18 +14,28 @@ export function useEmployee() {
   const currentPage = ref(1);
   const tokenType = ref<TTokenType>('global');
 
-  async function getEmployees(token: string | null): Promise<string | null> {
+  const isEmptyTokenList = computed(() => {
+    return tokenList.value === null || Object.keys(tokenList.value).length === 0;
+  });
+
+  async function getEmployees(token: string | null): Promise<IEmployee | null> {
     const response = (await API.graphql({
       query: listEmployees,
       variables: { limit: queryLimit, nextToken: token }
     })) as any;
 
     const items = response.data.listEmployees.items || [];
+
+    return {
+      items,
+      nextToken: response.data.listEmployees.nextToken ?? null
+    };
+  }
+
+  function setEmployee(items: Employee[]) {
     if (items.length > 0) {
       employees.value = items.filter((item: Employee): item is Employee => !!item);
     }
-
-    return response.data.listEmployees.nextToken ?? null;
   }
 
   function getPageToken(page: number): string | null {
@@ -39,25 +50,32 @@ export function useEmployee() {
   }
 
   async function nextPageEmployees() {
-    if (tokenList.value !== null) {
+    if (!isEmptyTokenList.value) {
       const page = currentPage.value + 1;
-      const nextToken = getPageToken(page);
-      const token = await getEmployees(nextToken);
+      const pageToken = getPageToken(page);
+      const res = await getEmployees(pageToken);
 
-      if (nextToken) {
-        setCurrentPage(page);
-        setTokenToList(token, page + 1);
+      if (res !== null) {
+        const { items, nextToken } = res;
+        setEmployee(items);
+        if (pageToken) {
+          setCurrentPage(page);
+          setTokenToList(nextToken, page + 1);
+        }
       }
-
     }
   }
 
   async function prevPageEmployees() {
-    if (tokenList.value !== null) {
+    if (!isEmptyTokenList.value) {
       const page = currentPage.value - 1 <= 0 ? 1 : currentPage.value - 1;
       const nextToken = page > 1 ? getPageToken(page) : null;
+      const res = await getEmployees(nextToken);
 
-      const token = await getEmployees(nextToken);
+      if (res !== null) {
+        const { items } = res;
+        setEmployee(items);
+      }
       setCurrentPage(page);
       // setTokenToList(token, page);
     }
@@ -120,7 +138,7 @@ export function useEmployee() {
     }
   }
 
-  async function setEmployee(input: CreateEmployeeInput) {
+  async function createEmployeeAction(input: CreateEmployeeInput) {
     try {
       await API.graphql(graphqlOperation(createEmployee, { input }));
     } catch (error) {
@@ -150,6 +168,7 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
+
   return {
     employees,
     tokenList,
@@ -157,13 +176,14 @@ export function useEmployee() {
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
-    setEmployee,
+    createEmployeeAction,
     subscribeToEmployees,
     getFavouritesEmployees,
     prevPageEmployees,
     nextPageEmployees,
     setTokenToList,
     getPageToken,
-    setCurrentPage
+    setCurrentPage,
+    setEmployee
   };
 }
