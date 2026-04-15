@@ -1,9 +1,11 @@
-import type { CreateEmployeeInput, Employee, UpdateEmployeeInput, DeleteEmployeeInput } from '@/API';
+import type { Employee } from '@/API';
 
 export type IEmployee = {
   items: Employee[],
   nextToken: string,
 }
+
+export type TIFavourite = 'true' | 'false';
 
 export interface IIsEmpty {
   isEmpty: boolean;
@@ -13,5 +15,5 @@ export interface IIsEmpty {
 export interface IVariables {
   limit: number,
   nextToken: string | null,
-  filter?: Record<string, any> | null,
+  isFavourite?: TIFavourite,
 };

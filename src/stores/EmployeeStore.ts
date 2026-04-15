@@ -8,7 +8,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     employees,
     currentPage,
     tokenList,
-    filter,
     useFilter,
     getEmployees,
     updateFavoriteAction,
@@ -45,7 +44,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
     try {
-      const res = await getEmployees(token, filter.value);
+      const res = await getEmployees(token);
       if (res !== null) {
         const { items, nextToken } = res;
         setEmployee(items);
@@ -112,7 +111,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     unsubscribe = subscribeToEmployees(async (data, type) => {
       if (type === 'CREATE') {
         const currPageToken = getPageToken(currentPage.value);
-        const res = await getEmployees(currPageToken, filter.value);
+        const res = await getEmployees(currPageToken);
 
         if (res !== null) {
           const { items, nextToken } = res;
@@ -131,7 +130,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
         }
       } else if (type === 'DELETE') {
         const currPageToken = getPageToken(currentPage.value);
-        const res = await getEmployees(currPageToken, filter.value);
+        const res = await getEmployees(currPageToken);
 
         if (res !== null) {
           const { items, nextToken } = res;
@@ -152,7 +151,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
             if (prevPage !== currentPage.value) {
               setCurrentPage(prevPage);
               const prevPageToken = getPageToken(prevPage);
-              const prevPageRes = await getEmployees(prevPageToken, filter.value);
+              const prevPageRes = await getEmployees(prevPageToken);
 
               if (prevPageRes !== null) {
                 setEmployee(prevPageRes.items);

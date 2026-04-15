@@ -15,36 +15,29 @@ export function useEmployee() {
   const currentPage = ref(1);
   const tokenType = ref<TTokenType>('global');
   const useFilter = ref(false);
-  const filter = computed(() => {
-    return useFilter.value ? {
-      isFavourite:
-        {
-          eq: 'true'
-        }
-    } : null;
-  });
 
-  async function getEmployees(token: string | null, filter?: Record<string, any> | null): Promise<IEmployee | null> {
+  async function getEmployees(token: string | null): Promise<IEmployee | null> {
     const variables: IVariables = {
       limit: queryLimit,
-      nextToken: token
+      nextToken: token,
     };
 
-    console.log(filter, 'filter');
-    if (filter) {
-      variables.filter = filter;
+    const query = useFilter.value ? employeesByFavourite : listEmployees;
+
+    if(useFilter.value) {
+      variables.isFavourite =  'true'
     }
     const response = (await API.graphql({
-      query: listEmployees,
+      query: query,
       variables: variables
     })) as any;
 
-
-    const items = response.data.listEmployees.items || [];
+    const data = useFilter.value ? response.data.employeesByFavourite : response.data.listEmployees;
+    const items = data.items || [];
 
     return {
       items,
-      nextToken: response.data.listEmployees.nextToken ?? null
+      nextToken: data.nextToken ?? null
     };
   }
 
@@ -77,7 +70,7 @@ export function useEmployee() {
     if (!hasTokenForPage(nextPage)) return;
 
     const pageToken = getPageToken(nextPage);
-    const res = await getEmployees(pageToken, filter.value);
+    const res = await getEmployees(pageToken);
 
     if (res !== null) {
       const { items, nextToken } = res;
@@ -95,7 +88,7 @@ export function useEmployee() {
 
     const prevPage = currentPage.value - 1;
     const pageToken = getPageToken(prevPage);
-    const res = await getEmployees(pageToken, filter.value);
+    const res = await getEmployees(pageToken);
 
     if (res !== null) {
       const { items } = res;
@@ -219,7 +212,7 @@ export function useEmployee() {
   async function verifyAndSetNextToken(nextToken: string | null, forPage: number): Promise<boolean> {
     if (!nextToken) return false;
 
-    const res = await getEmployees(nextToken, filter.value);
+    const res = await getEmployees(nextToken);
 
     if (res !== null && res.items.length > 0) {
       setTokenToList(nextToken, forPage);
@@ -243,7 +236,6 @@ export function useEmployee() {
     tokenList,
     currentPage,
     useFilter,
-    filter,
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
