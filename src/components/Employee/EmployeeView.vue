@@ -17,6 +17,7 @@ async function createEmployee(input: CreateEmployeeInput) {
 
 function showFavouritesEmployee() {
   employeeStore.toggleShowUseFilter();
+  employeeStore.clearTokenList();
   employeeStore.fetchEmployees(null);
 }
 

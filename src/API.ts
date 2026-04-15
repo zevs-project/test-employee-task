@@ -5,7 +5,7 @@
 export type CreateEmployeeInput = {
   id?: string | null,
   name: string,
-  isFavourite?: string | null,
+  isFavourite: string,
   position: string,
 };
 
@@ -13,8 +13,8 @@ export type ModelEmployeeConditionInput = {
   name?: ModelStringInput | null,
   isFavourite?: ModelStringInput | null,
   position?: ModelStringInput | null,
-  and?: Array<ModelEmployeeConditionInput | null> | null,
-  or?: Array<ModelEmployeeConditionInput | null> | null,
+  and?: Array< ModelEmployeeConditionInput | null > | null,
+  or?: Array< ModelEmployeeConditionInput | null > | null,
   not?: ModelEmployeeConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
@@ -29,7 +29,7 @@ export type ModelStringInput = {
   gt?: string | null,
   contains?: string | null,
   notContains?: string | null,
-  between?: Array<string | null> | null,
+  between?: Array< string | null > | null,
   beginsWith?: string | null,
   attributeExists?: boolean | null,
   attributeType?: ModelAttributeTypes | null,
@@ -37,16 +37,16 @@ export type ModelStringInput = {
 };
 
 export enum ModelAttributeTypes {
-  binary = 'binary',
-  binarySet = 'binarySet',
-  bool = 'bool',
-  list = 'list',
-  map = 'map',
-  number = 'number',
-  numberSet = 'numberSet',
-  string = 'string',
-  stringSet = 'stringSet',
-  _null = '_null',
+  binary = "binary",
+  binarySet = "binarySet",
+  bool = "bool",
+  list = "list",
+  map = "map",
+  number = "number",
+  numberSet = "numberSet",
+  string = "string",
+  stringSet = "stringSet",
+  _null = "_null",
 }
 
 
@@ -57,14 +57,14 @@ export type ModelSizeInput = {
   lt?: number | null,
   ge?: number | null,
   gt?: number | null,
-  between?: Array<number | null> | null,
+  between?: Array< number | null > | null,
 };
 
 export type Employee = {
-  __typename: 'Employee',
+  __typename: "Employee",
   id: string,
   name: string,
-  isFavourite?: string | null,
+  isFavourite: string,
   position: string,
   createdAt: string,
   updatedAt: string,
@@ -88,8 +88,8 @@ export type ModelEmployeeFilterInput = {
   position?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  and?: Array<ModelEmployeeFilterInput | null> | null,
-  or?: Array<ModelEmployeeFilterInput | null> | null,
+  and?: Array< ModelEmployeeFilterInput | null > | null,
+  or?: Array< ModelEmployeeFilterInput | null > | null,
   not?: ModelEmployeeFilterInput | null,
 };
 
@@ -102,7 +102,7 @@ export type ModelIDInput = {
   gt?: string | null,
   contains?: string | null,
   notContains?: string | null,
-  between?: Array<string | null> | null,
+  between?: Array< string | null > | null,
   beginsWith?: string | null,
   attributeExists?: boolean | null,
   attributeType?: ModelAttributeTypes | null,
@@ -110,14 +110,14 @@ export type ModelIDInput = {
 };
 
 export type ModelEmployeeConnection = {
-  __typename: 'ModelEmployeeConnection',
-  items: Array<Employee | null>,
+  __typename: "ModelEmployeeConnection",
+  items:  Array<Employee | null >,
   nextToken?: string | null,
 };
 
 export enum ModelSortDirection {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  ASC = "ASC",
+  DESC = "DESC",
 }
 
 
@@ -128,8 +128,8 @@ export type ModelSubscriptionEmployeeFilterInput = {
   position?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array<ModelSubscriptionEmployeeFilterInput | null> | null,
-  or?: Array<ModelSubscriptionEmployeeFilterInput | null> | null,
+  and?: Array< ModelSubscriptionEmployeeFilterInput | null > | null,
+  or?: Array< ModelSubscriptionEmployeeFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -141,10 +141,10 @@ export type ModelSubscriptionIDInput = {
   gt?: string | null,
   contains?: string | null,
   notContains?: string | null,
-  between?: Array<string | null> | null,
+  between?: Array< string | null > | null,
   beginsWith?: string | null,
-  in?: Array<string | null> | null,
-  notIn?: Array<string | null> | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionStringInput = {
@@ -156,10 +156,10 @@ export type ModelSubscriptionStringInput = {
   gt?: string | null,
   contains?: string | null,
   notContains?: string | null,
-  between?: Array<string | null> | null,
+  between?: Array< string | null > | null,
   beginsWith?: string | null,
-  in?: Array<string | null> | null,
-  notIn?: Array<string | null> | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type CreateEmployeeMutationVariables = {
@@ -168,11 +168,11 @@ export type CreateEmployeeMutationVariables = {
 };
 
 export type CreateEmployeeMutation = {
-  createEmployee?: {
-    __typename: 'Employee',
+  createEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -185,11 +185,11 @@ export type UpdateEmployeeMutationVariables = {
 };
 
 export type UpdateEmployeeMutation = {
-  updateEmployee?: {
-    __typename: 'Employee',
+  updateEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -202,11 +202,11 @@ export type DeleteEmployeeMutationVariables = {
 };
 
 export type DeleteEmployeeMutation = {
-  deleteEmployee?: {
-    __typename: 'Employee',
+  deleteEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -218,11 +218,11 @@ export type GetEmployeeQueryVariables = {
 };
 
 export type GetEmployeeQuery = {
-  getEmployee?: {
-    __typename: 'Employee',
+  getEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -236,17 +236,17 @@ export type ListEmployeesQueryVariables = {
 };
 
 export type ListEmployeesQuery = {
-  listEmployees?: {
-    __typename: 'ModelEmployeeConnection',
-    items: Array<{
-      __typename: 'Employee',
+  listEmployees?:  {
+    __typename: "ModelEmployeeConnection",
+    items:  Array< {
+      __typename: "Employee",
       id: string,
       name: string,
-      isFavourite?: string | null,
+      isFavourite: string,
       position: string,
       createdAt: string,
       updatedAt: string,
-    } | null>,
+    } | null >,
     nextToken?: string | null,
   } | null,
 };
@@ -260,17 +260,17 @@ export type EmployeesByNameQueryVariables = {
 };
 
 export type EmployeesByNameQuery = {
-  employeesByName?: {
-    __typename: 'ModelEmployeeConnection',
-    items: Array<{
-      __typename: 'Employee',
+  employeesByName?:  {
+    __typename: "ModelEmployeeConnection",
+    items:  Array< {
+      __typename: "Employee",
       id: string,
       name: string,
-      isFavourite?: string | null,
+      isFavourite: string,
       position: string,
       createdAt: string,
       updatedAt: string,
-    } | null>,
+    } | null >,
     nextToken?: string | null,
   } | null,
 };
@@ -284,17 +284,17 @@ export type EmployeesByFavouriteQueryVariables = {
 };
 
 export type EmployeesByFavouriteQuery = {
-  employeesByFavourite?: {
-    __typename: 'ModelEmployeeConnection',
-    items: Array<{
-      __typename: 'Employee',
+  employeesByFavourite?:  {
+    __typename: "ModelEmployeeConnection",
+    items:  Array< {
+      __typename: "Employee",
       id: string,
       name: string,
-      isFavourite?: string | null,
+      isFavourite: string,
       position: string,
       createdAt: string,
       updatedAt: string,
-    } | null>,
+    } | null >,
     nextToken?: string | null,
   } | null,
 };
@@ -304,11 +304,11 @@ export type OnCreateEmployeeSubscriptionVariables = {
 };
 
 export type OnCreateEmployeeSubscription = {
-  onCreateEmployee?: {
-    __typename: 'Employee',
+  onCreateEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -320,11 +320,11 @@ export type OnUpdateEmployeeSubscriptionVariables = {
 };
 
 export type OnUpdateEmployeeSubscription = {
-  onUpdateEmployee?: {
-    __typename: 'Employee',
+  onUpdateEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,
@@ -336,11 +336,11 @@ export type OnDeleteEmployeeSubscriptionVariables = {
 };
 
 export type OnDeleteEmployeeSubscription = {
-  onDeleteEmployee?: {
-    __typename: 'Employee',
+  onDeleteEmployee?:  {
+    __typename: "Employee",
     id: string,
     name: string,
-    isFavourite?: string | null,
+    isFavourite: string,
     position: string,
     createdAt: string,
     updatedAt: string,

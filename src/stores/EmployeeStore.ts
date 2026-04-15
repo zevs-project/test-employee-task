@@ -25,7 +25,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     invalidateTokensFrom,
     hasTokenForPage,
     verifyAndSetNextToken,
-    toggleShowUseFilter
+    toggleShowUseFilter,
+    clearTokenList
 
   } = useEmployee();
 
@@ -33,7 +34,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
   const showFavourites = ref(false);
   let unsubscribe: (() => void) | null = null;
 
-  // Computed властивості для стану кнопок пагінації
   const isNextActive = computed(() => {
     return hasTokenForPage(currentPage.value + 1);
   });
@@ -44,12 +44,13 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
-    console.log(filter.value, 'filter');
     try {
       const res = await getEmployees(token, filter.value);
       if (res !== null) {
         const { items, nextToken } = res;
         setEmployee(items);
+
+        console.log(items, 'items 11212');
 
         if (nextToken) {
           await verifyAndSetNextToken(nextToken, currentPage.value + 1);
@@ -110,7 +111,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
     unsubscribe = subscribeToEmployees(async (data, type) => {
       if (type === 'CREATE') {
-        // При створенні — рефетч поточної сторінки і інвалідація токенів далі
         const currPageToken = getPageToken(currentPage.value);
         const res = await getEmployees(currPageToken, filter.value);
 
@@ -118,43 +118,35 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
           const { items, nextToken } = res;
           setEmployee(items);
 
-          // Інвалідуємо всі токени після поточної сторінки
           invalidateTokensFrom(currentPage.value);
 
-          // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
           if (nextToken) {
             await verifyAndSetNextToken(nextToken, currentPage.value + 1);
           }
         }
       } else if (type === 'UPDATE') {
-        // При оновленні — просто оновлюємо елемент в списку
         const index = employees.value.findIndex((e) => e.id === data.id);
         if (index !== -1) {
           employees.value[index] = { ...employees.value[index], ...data };
         }
       } else if (type === 'DELETE') {
-        // При видаленні — рефетч поточної сторінки
         const currPageToken = getPageToken(currentPage.value);
         const res = await getEmployees(currPageToken, filter.value);
 
         if (res !== null) {
           const { items, nextToken } = res;
 
-          // Інвалідуємо всі токени після поточної сторінки
           invalidateTokensFrom(currentPage.value);
 
           if (items.length > 0) {
             setEmployee(items);
 
-            // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
             if (nextToken) {
               await verifyAndSetNextToken(nextToken, currentPage.value + 1);
             }
           } else {
-            // Якщо на поточній сторінці немає елементів — переходимо на попередню
             const prevPage = Math.max(1, currentPage.value - 1);
 
-            // Видаляємо токен для поточної сторінки
             removeTokenToList(currentPage.value);
 
             if (prevPage !== currentPage.value) {
@@ -165,13 +157,11 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
               if (prevPageRes !== null) {
                 setEmployee(prevPageRes.items);
 
-                // Перевіряємо чи наступна сторінка має елементи
                 if (prevPageRes.nextToken) {
                   await verifyAndSetNextToken(prevPageRes.nextToken, prevPage + 1);
                 }
               }
             } else {
-              // Ми на сторінці 1 і вона пуста
               setEmployee([]);
             }
           }
@@ -191,9 +181,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     showFavourites.value = !showFavourites.value;
   }
 
-  // Deep watch для tokenList — щоб бачити зміни всередині масивів
   watch(tokenList, () => {
-    // computed властивості автоматично перераховуються
     console.log('tokenList changed:', tokenList.value);
   }, {
     immediate: true,
@@ -214,6 +202,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     isNextActive,
     isPrevActive,
     useFilter,
+    tokenList,
     fetchEmployees,
     toggleFavouriteAction,
     removeEmployee,
@@ -222,6 +211,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     stopSubscriptions,
     fetchNextEmployees,
     fetchPrevEmployees,
-    toggleShowUseFilter
+    toggleShowUseFilter,
+    clearTokenList
   };
 });
