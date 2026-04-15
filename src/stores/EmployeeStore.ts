@@ -22,7 +22,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     removeTokenToList,
     setEmployee,
     invalidateTokensFrom,
-    hasTokenForPage
+    hasTokenForPage,
+    verifyAndSetNextToken
   } = useEmployee();
 
   const isLoading = ref(false);
@@ -46,9 +47,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
         const { items, nextToken } = res;
         setEmployee(items);
 
-        // Зберігаємо токен для наступної сторінки якщо він є
+        // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
         if (nextToken) {
-          setTokenToList(nextToken, currentPage.value + 1);
+          await verifyAndSetNextToken(nextToken, currentPage.value + 1);
         }
       }
     } finally {
@@ -117,9 +118,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
           // Інвалідуємо всі токени після поточної сторінки
           invalidateTokensFrom(currentPage.value);
 
-          // Зберігаємо новий токен для наступної сторінки
+          // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
           if (nextToken) {
-            setTokenToList(nextToken, currentPage.value + 1);
+            await verifyAndSetNextToken(nextToken, currentPage.value + 1);
           }
         }
       } else if (type === 'UPDATE') {
@@ -142,9 +143,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
           if (items.length > 0) {
             setEmployee(items);
 
-            // Зберігаємо новий токен для наступної сторінки
+            // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
             if (nextToken) {
-              setTokenToList(nextToken, currentPage.value + 1);
+              await verifyAndSetNextToken(nextToken, currentPage.value + 1);
             }
           } else {
             // Якщо на поточній сторінці немає елементів — переходимо на попередню
@@ -161,9 +162,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
               if (prevPageRes !== null) {
                 setEmployee(prevPageRes.items);
 
-                // Оновлюємо токен для наступної сторінки (якщо є)
+                // Перевіряємо чи наступна сторінка має елементи
                 if (prevPageRes.nextToken) {
-                  setTokenToList(prevPageRes.nextToken, prevPage + 1);
+                  await verifyAndSetNextToken(prevPageRes.nextToken, prevPage + 1);
                 }
               }
             } else {

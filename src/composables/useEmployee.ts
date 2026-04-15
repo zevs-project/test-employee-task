@@ -70,9 +70,9 @@ export function useEmployee() {
       setEmployee(items);
       setCurrentPage(nextPage);
 
-      // Якщо є наступна сторінка — зберігаємо токен
+      // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
       if (nextToken) {
-        setTokenToList(nextToken, nextPage + 1);
+        await verifyAndSetNextToken(nextToken, nextPage + 1);
       }
     }
   }
@@ -206,6 +206,22 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
+  // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+  async function verifyAndSetNextToken(nextToken: string | null, forPage: number): Promise<boolean> {
+    if (!nextToken) return false;
+
+    // Робимо запит щоб перевірити чи є елементи на наступній сторінці
+    const res = await getEmployees(nextToken);
+
+    if (res !== null && res.items.length > 0) {
+      // Є елементи — зберігаємо токен
+      setTokenToList(nextToken, forPage);
+      return true;
+    }
+
+    // Немає елементів — не зберігаємо токен
+    return false;
+  }
 
   return {
     employees,
@@ -225,6 +241,7 @@ export function useEmployee() {
     setEmployee,
     removeTokenToList,
     invalidateTokensFrom,
-    hasTokenForPage
+    hasTokenForPage,
+    verifyAndSetNextToken
   };
 }
