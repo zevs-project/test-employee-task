@@ -5,7 +5,7 @@ import { updateEmployee, deleteEmployee, createEmployee } from '@/graphql/mutati
 import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/subscriptions';
 import { API, graphqlOperation } from 'aws-amplify';
 import type { TokensMap, TTokenType } from '@/types/TPosition.ts';
-import type { IEmployee } from '@/types/TEmployee';
+import type { IEmployee, IIsEmpty } from '@/types/TEmployee';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
@@ -111,6 +111,21 @@ export function useEmployee() {
     }
   }
 
+  function removeTokenToList(page: number): boolean {
+    if (!tokenList.value) return false;
+    const tokenTypeList = tokenList.value[tokenType.value];
+
+    if (!tokenTypeList) return false;
+
+    const pageIndex = tokenTypeList.findIndex((elem) => elem.page === page);
+
+    if (pageIndex !== -1) {
+      tokenTypeList.splice(pageIndex, 1);
+      return true;
+    }
+    return false;
+  }
+
   async function getFavouritesEmployees(token?: string) {
     const response = (await API.graphql({
       query: employeesByFavourite,
@@ -168,6 +183,20 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
+  async function isEmptyNextTokenList(nextToken: string | null): Promise<IIsEmpty> {
+    const res = await getEmployees(nextToken);
+
+    if (res !== null) {
+      const { items, nextToken } = res;
+      return {
+        isEmpty: items.length === 0 || nextToken === null,
+        nextToken
+      };
+    }
+
+    return { isEmpty: true, nextToken: null };
+  }
+
 
   return {
     employees,
@@ -184,6 +213,8 @@ export function useEmployee() {
     setTokenToList,
     getPageToken,
     setCurrentPage,
-    setEmployee
+    setEmployee,
+    removeTokenToList,
+    isEmptyNextTokenList
   };
 }

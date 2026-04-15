@@ -4,3 +4,8 @@ export type IEmployee = {
   items: Employee[],
   nextToken: string,
 }
+
+export interface IIsEmpty {
+  isEmpty: boolean;
+  nextToken: string | null;
+}

@@ -19,7 +19,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     setTokenToList,
     getPageToken,
     setCurrentPage,
-    setEmployee
+    removeTokenToList,
+    setEmployee,
+    isEmptyNextTokenList
   } = useEmployee();
   const isLoading = ref(false);
   const showFavourites = ref(false);
@@ -34,8 +36,12 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       const res = await getEmployees(token);
       if (res !== null) {
         const { items, nextToken } = res;
+        const { isEmpty, nextToken: nextToken2 } = await isEmptyNextTokenList(nextToken);
+
+        if (!isEmpty) {
+          setTokenToList(nextToken, currentPage.value + 1);
+        }
         setEmployee(items);
-        setTokenToList(nextToken, currentPage.value + 1);
       }
 
     } finally {
@@ -99,11 +105,12 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
         if (res !== null) {
           const { items, nextToken } = res;
           setEmployee(items);
-          setTokenToList(nextToken, currentPage.value + 1);
-          setTokenToList(nextToken, currentPage.value);
-        }
-        // setCurrentPage(currentPage.value);
 
+          const { isEmpty, nextToken: nextToken2 } = await isEmptyNextTokenList(nextToken);
+          if (!isEmpty) {
+            setTokenToList(nextToken, currentPage.value + 1);
+          }
+        }
       } else if (type === 'UPDATE') {
         const index = employees.value.findIndex((e) => e.id === data.id);
         if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
@@ -113,14 +120,28 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
         if (res !== null) {
           const { items, nextToken } = res;
-          const prevPageNextToken = getPageToken(currentPage.value - 1);
-          const prevPageToken = await getEmployees(prevPageNextToken);
 
-          console.log(tokenList.value, 'ssdfsf');
+          if (items.length > 0) {
+            setEmployee(items);
 
-          if (prevPageToken === null && currentPage.value !== 1) {
-            setCurrentPage(currentPage.value - 1);
-            setTokenToList(prevPageToken, currentPage.value);
+            const { isEmpty, nextToken: nextToken2 } = await isEmptyNextTokenList(nextToken);
+            if (!isEmpty) {
+              setTokenToList(nextToken, currentPage.value + 1);
+            }
+            console.log(items, tokenList.value, 'delete action');
+          } else {
+            const prevPage = currentPage.value - 1 <= 1 ? 1 : currentPage.value - 1;
+            removeTokenToList(currentPage.value);
+            setCurrentPage(prevPage);
+            const prevPageRes = await getEmployees(getPageToken(prevPage));
+
+            if(prevPageRes !== null) {
+              const { items } = prevPageRes;
+              setEmployee(items);
+            }
+            // const { isEmpty, nextToken: nextToken2 } = await isEmptyNextTokenList(currPageToken);
+
+            console.log(items, nextToken, 'delete action 2222');
           }
         }
 
@@ -144,6 +165,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     const tokenNextPage = getPageToken(nextPageNumber);
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = currentPage.value > 1;
+    console.log(tokenList.value, 'token list');
   }, {
     immediate: true
   });
@@ -153,12 +175,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     const tokenNextPage = getPageToken(nextPageNumber);
     isNextActive.value = !!tokenNextPage;
     isPrevActive.value = newCurrentPage > 1;
-  }, {
-    immediate: true
-  });
-
-  watch(tokenList, () => {
-    console.log(tokenList.value, 'token list');
+    console.log(tokenList.value, 'token list 222');
   }, {
     immediate: true
   });
