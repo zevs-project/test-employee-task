@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ref, triggerRef } from 'vue';
+import { computed, ref, triggerRef } from 'vue';
 import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from '@/API';
 import { employeesByFavourite, listEmployees } from '@/graphql/queries.ts';
 import { updateEmployee, deleteEmployee, createEmployee } from '@/graphql/mutations';
 import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/subscriptions';
 import { API, graphqlOperation } from 'aws-amplify';
 import type { TokensMap, TTokenType } from '@/types/TPosition.ts';
-import type { IEmployee } from '@/types/TEmployee';
+import type { IEmployee, IVariables } from '@/types/TEmployee';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
@@ -14,13 +14,31 @@ export function useEmployee() {
   const tokenList = ref<TokensMap | null>(null);
   const currentPage = ref(1);
   const tokenType = ref<TTokenType>('global');
+  const useFilter = ref(false);
+  const filter = computed(() => {
+    return useFilter.value ? {
+      isFavourite:
+        {
+          eq: 'true'
+        }
+    } : null;
+  });
 
+  async function getEmployees(token: string | null, filter?: Record<string, any> | null): Promise<IEmployee | null> {
+    const variables: IVariables = {
+      limit: queryLimit,
+      nextToken: token
+    };
 
-  async function getEmployees(token: string | null): Promise<IEmployee | null> {
+    console.log(filter, 'filter');
+    if (filter) {
+      variables.filter = filter;
+    }
     const response = (await API.graphql({
       query: listEmployees,
-      variables: { limit: queryLimit, nextToken: token }
+      variables: variables
     })) as any;
+
 
     const items = response.data.listEmployees.items || [];
 
@@ -63,7 +81,7 @@ export function useEmployee() {
     if (!hasTokenForPage(nextPage)) return;
 
     const pageToken = getPageToken(nextPage);
-    const res = await getEmployees(pageToken);
+    const res = await getEmployees(pageToken, filter.value);
 
     if (res !== null) {
       const { items, nextToken } = res;
@@ -82,7 +100,7 @@ export function useEmployee() {
 
     const prevPage = currentPage.value - 1;
     const pageToken = getPageToken(prevPage);
-    const res = await getEmployees(pageToken);
+    const res = await getEmployees(pageToken, filter.value);
 
     if (res !== null) {
       const { items } = res;
@@ -211,7 +229,7 @@ export function useEmployee() {
     if (!nextToken) return false;
 
     // Робимо запит щоб перевірити чи є елементи на наступній сторінці
-    const res = await getEmployees(nextToken);
+    const res = await getEmployees(nextToken, filter.value);
 
     if (res !== null && res.items.length > 0) {
       // Є елементи — зберігаємо токен
@@ -223,10 +241,16 @@ export function useEmployee() {
     return false;
   }
 
+  function toggleShowUseFilter() {
+    useFilter.value = !useFilter.value;
+  }
+
   return {
     employees,
     tokenList,
     currentPage,
+    useFilter,
+    filter,
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
@@ -235,13 +259,13 @@ export function useEmployee() {
     getFavouritesEmployees,
     prevPageEmployees,
     nextPageEmployees,
-    setTokenToList,
     getPageToken,
     setCurrentPage,
     setEmployee,
     removeTokenToList,
     invalidateTokensFrom,
     hasTokenForPage,
-    verifyAndSetNextToken
+    verifyAndSetNextToken,
+    toggleShowUseFilter
   };
 }

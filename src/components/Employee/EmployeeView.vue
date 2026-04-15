@@ -10,14 +10,14 @@ defineProps<{ positions: TPosition }>();
 
 const employeeStore = useEmployeeStore();
 const createDialogVisible = ref(false);
-const showFavourites = ref(false);
 
 async function createEmployee(input: CreateEmployeeInput) {
   await employeeStore.addEmployeeAction(input);
 }
 
 function showFavouritesEmployee() {
-  showFavourites.value = true;
+  employeeStore.toggleShowUseFilter();
+  employeeStore.fetchEmployees(null);
 }
 
 function showCreateDialog() {
@@ -39,6 +39,7 @@ onUnmounted(() => {
     <EmployeeTopMenu
       @show-favourites-employee="showFavouritesEmployee"
       @add-employee="showCreateDialog"
+      :is-show-favourites="employeeStore.useFilter"
     ></EmployeeTopMenu>
 
     <Dialog

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import InputText from 'primevue/inputtext';
 import { Button } from 'primevue';
 
+const props = defineProps<{ isShowFavourites: boolean }>(
+);
+
 const searchText = ref('');
 const addButtonLabel = 'Add new';
-const showFavouritesButtonLabel = 'Show favourites';
+const showFavouritesButtonLabel = computed(() => props.isShowFavourites ? 'Hide favourites' : 'Show favourites');
 
 const emit = defineEmits<{
   (e: 'addEmployee'): void
@@ -19,6 +22,7 @@ function emitAddEmployee() {
 function emitShowFavouritesEmployee() {
   emit('showFavouritesEmployee');
 }
+
 </script>
 
 <template>

@@ -8,6 +8,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     employees,
     currentPage,
     tokenList,
+    filter,
+    useFilter,
     getEmployees,
     updateFavoriteAction,
     deleteEmployeeAction,
@@ -16,14 +18,15 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     subscribeToEmployees,
     nextPageEmployees,
     prevPageEmployees,
-    setTokenToList,
     getPageToken,
     setCurrentPage,
     removeTokenToList,
     setEmployee,
     invalidateTokensFrom,
     hasTokenForPage,
-    verifyAndSetNextToken
+    verifyAndSetNextToken,
+    toggleShowUseFilter
+
   } = useEmployee();
 
   const isLoading = ref(false);
@@ -41,13 +44,13 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
+    console.log(filter.value, 'filter');
     try {
-      const res = await getEmployees(token);
+      const res = await getEmployees(token, filter.value);
       if (res !== null) {
         const { items, nextToken } = res;
         setEmployee(items);
 
-        // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
         if (nextToken) {
           await verifyAndSetNextToken(nextToken, currentPage.value + 1);
         }
@@ -109,7 +112,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       if (type === 'CREATE') {
         // При створенні — рефетч поточної сторінки і інвалідація токенів далі
         const currPageToken = getPageToken(currentPage.value);
-        const res = await getEmployees(currPageToken);
+        const res = await getEmployees(currPageToken, filter.value);
 
         if (res !== null) {
           const { items, nextToken } = res;
@@ -132,7 +135,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       } else if (type === 'DELETE') {
         // При видаленні — рефетч поточної сторінки
         const currPageToken = getPageToken(currentPage.value);
-        const res = await getEmployees(currPageToken);
+        const res = await getEmployees(currPageToken, filter.value);
 
         if (res !== null) {
           const { items, nextToken } = res;
@@ -157,7 +160,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
             if (prevPage !== currentPage.value) {
               setCurrentPage(prevPage);
               const prevPageToken = getPageToken(prevPage);
-              const prevPageRes = await getEmployees(prevPageToken);
+              const prevPageRes = await getEmployees(prevPageToken, filter.value);
 
               if (prevPageRes !== null) {
                 setEmployee(prevPageRes.items);
@@ -210,6 +213,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     currentPage,
     isNextActive,
     isPrevActive,
+    useFilter,
     fetchEmployees,
     toggleFavouriteAction,
     removeEmployee,
@@ -217,6 +221,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     initSubscriptions,
     stopSubscriptions,
     fetchNextEmployees,
-    fetchPrevEmployees
+    fetchPrevEmployees,
+    toggleShowUseFilter
   };
 });

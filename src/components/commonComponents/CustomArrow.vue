@@ -11,9 +11,6 @@ const emit = defineEmits(['nextPage', 'prevPage']);
     <i class="pi pi-arrow-circle-left" :class="{inactive: !employeeStore.isPrevActive}" @click="emit('prevPage')"></i>
     <i>Current page {{ employeeStore.currentPage }}</i>
     <i class="pi pi-arrow-circle-right" :class="{inactive: !employeeStore.isNextActive}" @click="emit('nextPage')"></i>
-
-    {{ employeeStore.isPrevActive }}
-    {{ employeeStore.isNextActive }}
   </div>
 </template>
 
