@@ -1,4 +1,4 @@
-import { ref, onUnmounted, computed, watch, watchEffect } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { useEmployee } from '@/composables/useEmployee';
 import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
@@ -19,14 +19,25 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     setTokenToList,
     getPageToken,
     setCurrentPage,
-    setEmployee
+    removeTokenToList,
+    setEmployee,
+    invalidateTokensFrom,
+    hasTokenForPage,
+    verifyAndSetNextToken
   } = useEmployee();
+
   const isLoading = ref(false);
   const showFavourites = ref(false);
   let unsubscribe: (() => void) | null = null;
 
-  const isNextActive = ref(true);
-  const isPrevActive = ref(true);
+  // Computed властивості для стану кнопок пагінації
+  const isNextActive = computed(() => {
+    return hasTokenForPage(currentPage.value + 1);
+  });
+
+  const isPrevActive = computed(() => {
+    return currentPage.value > 1;
+  });
 
   async function fetchEmployees(token: string | null = null) {
     isLoading.value = true;
@@ -35,9 +46,12 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       if (res !== null) {
         const { items, nextToken } = res;
         setEmployee(items);
-        setTokenToList(nextToken, currentPage.value + 1);
-      }
 
+        // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+        if (nextToken) {
+          await verifyAndSetNextToken(nextToken, currentPage.value + 1);
+        }
+      }
     } finally {
       isLoading.value = false;
     }
@@ -93,37 +107,72 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
 
     unsubscribe = subscribeToEmployees(async (data, type) => {
       if (type === 'CREATE') {
+        // При створенні — рефетч поточної сторінки і інвалідація токенів далі
         const currPageToken = getPageToken(currentPage.value);
         const res = await getEmployees(currPageToken);
 
         if (res !== null) {
           const { items, nextToken } = res;
           setEmployee(items);
-          setTokenToList(nextToken, currentPage.value + 1);
-          setTokenToList(nextToken, currentPage.value);
-        }
-        // setCurrentPage(currentPage.value);
 
+          // Інвалідуємо всі токени після поточної сторінки
+          invalidateTokensFrom(currentPage.value);
+
+          // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+          if (nextToken) {
+            await verifyAndSetNextToken(nextToken, currentPage.value + 1);
+          }
+        }
       } else if (type === 'UPDATE') {
+        // При оновленні — просто оновлюємо елемент в списку
         const index = employees.value.findIndex((e) => e.id === data.id);
-        if (index !== -1) employees.value[index] = { ...employees.value[index], ...data };
+        if (index !== -1) {
+          employees.value[index] = { ...employees.value[index], ...data };
+        }
       } else if (type === 'DELETE') {
+        // При видаленні — рефетч поточної сторінки
         const currPageToken = getPageToken(currentPage.value);
         const res = await getEmployees(currPageToken);
 
         if (res !== null) {
           const { items, nextToken } = res;
-          const prevPageNextToken = getPageToken(currentPage.value - 1);
-          const prevPageToken = await getEmployees(prevPageNextToken);
 
-          console.log(tokenList.value, 'ssdfsf');
+          // Інвалідуємо всі токени після поточної сторінки
+          invalidateTokensFrom(currentPage.value);
 
-          if (prevPageToken === null && currentPage.value !== 1) {
-            setCurrentPage(currentPage.value - 1);
-            setTokenToList(prevPageToken, currentPage.value);
+          if (items.length > 0) {
+            setEmployee(items);
+
+            // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+            if (nextToken) {
+              await verifyAndSetNextToken(nextToken, currentPage.value + 1);
+            }
+          } else {
+            // Якщо на поточній сторінці немає елементів — переходимо на попередню
+            const prevPage = Math.max(1, currentPage.value - 1);
+
+            // Видаляємо токен для поточної сторінки
+            removeTokenToList(currentPage.value);
+
+            if (prevPage !== currentPage.value) {
+              setCurrentPage(prevPage);
+              const prevPageToken = getPageToken(prevPage);
+              const prevPageRes = await getEmployees(prevPageToken);
+
+              if (prevPageRes !== null) {
+                setEmployee(prevPageRes.items);
+
+                // Перевіряємо чи наступна сторінка має елементи
+                if (prevPageRes.nextToken) {
+                  await verifyAndSetNextToken(prevPageRes.nextToken, prevPage + 1);
+                }
+              }
+            } else {
+              // Ми на сторінці 1 і вона пуста
+              setEmployee([]);
+            }
           }
         }
-
       }
     });
   }
@@ -139,26 +188,17 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     showFavourites.value = !showFavourites.value;
   }
 
-  watch(tokenList, (newTokenList) => {
-    const nextPageNumber = currentPage.value + 1;
-    const tokenNextPage = getPageToken(nextPageNumber);
-    isNextActive.value = !!tokenNextPage;
-    isPrevActive.value = currentPage.value > 1;
+  // Deep watch для tokenList — щоб бачити зміни всередині масивів
+  watch(tokenList, () => {
+    // computed властивості автоматично перераховуються
+    console.log('tokenList changed:', tokenList.value);
   }, {
-    immediate: true
+    immediate: true,
+    deep: true
   });
 
   watch(currentPage, (newCurrentPage) => {
-    const nextPageNumber = currentPage.value + 1;
-    const tokenNextPage = getPageToken(nextPageNumber);
-    isNextActive.value = !!tokenNextPage;
-    isPrevActive.value = newCurrentPage > 1;
-  }, {
-    immediate: true
-  });
-
-  watch(tokenList, () => {
-    console.log(tokenList.value, 'token list');
+    console.log('currentPage changed:', newCurrentPage);
   }, {
     immediate: true
   });

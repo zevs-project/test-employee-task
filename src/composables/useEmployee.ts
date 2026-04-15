@@ -1,5 +1,6 @@
-import { computed, ref, watch } from 'vue';
-import type { CreateEmployeeInput, Employee, UpdateEmployeeInput, DeleteEmployeeInput } from '@/API';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ref, triggerRef } from 'vue';
+import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from '@/API';
 import { employeesByFavourite, listEmployees } from '@/graphql/queries.ts';
 import { updateEmployee, deleteEmployee, createEmployee } from '@/graphql/mutations';
 import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/subscriptions';
@@ -14,9 +15,6 @@ export function useEmployee() {
   const currentPage = ref(1);
   const tokenType = ref<TTokenType>('global');
 
-  const isEmptyTokenList = computed(() => {
-    return tokenList.value === null || Object.keys(tokenList.value).length === 0;
-  });
 
   async function getEmployees(token: string | null): Promise<IEmployee | null> {
     const response = (await API.graphql({
@@ -32,52 +30,64 @@ export function useEmployee() {
     };
   }
 
+  // Завжди оновлюємо employees, навіть якщо items пустий
   function setEmployee(items: Employee[]) {
-    if (items.length > 0) {
-      employees.value = items.filter((item: Employee): item is Employee => !!item);
-    }
+    employees.value = items.filter((item: Employee): item is Employee => !!item);
   }
 
+  // Для сторінки 1 токен завжди null, для інших шукаємо в tokenList
   function getPageToken(page: number): string | null {
+    if (page === 1) return null;
+
     if (tokenList.value !== null && tokenList.value?.[tokenType.value]) {
       const currentTokenType = tokenList.value?.[tokenType.value];
-      const nextToken = currentTokenType ? currentTokenType.find(
-        (elem) => elem.page === page
-      )?.nextToken : null;
-      return nextToken ? nextToken : null;
+      const tokenEntry = currentTokenType?.find((elem) => elem.page === page);
+      return tokenEntry?.nextToken ?? null;
     }
     return null;
   }
 
-  async function nextPageEmployees() {
-    if (!isEmptyTokenList.value) {
-      const page = currentPage.value + 1;
-      const pageToken = getPageToken(page);
-      const res = await getEmployees(pageToken);
+  // Перевіряємо чи є токен для конкретної сторінки (чи можна на неї перейти)
+  function hasTokenForPage(page: number): boolean {
+    if (page === 1) return true;
+    if (!tokenList.value || !tokenList.value[tokenType.value]) return false;
 
-      if (res !== null) {
-        const { items, nextToken } = res;
-        setEmployee(items);
-        if (pageToken) {
-          setCurrentPage(page);
-          setTokenToList(nextToken, page + 1);
-        }
+    const tokenEntry = tokenList.value[tokenType.value]?.find((elem) => elem.page === page);
+    return tokenEntry !== undefined && tokenEntry.nextToken !== null;
+  }
+
+  async function nextPageEmployees() {
+    const nextPage = currentPage.value + 1;
+
+    // Перевіряємо чи є токен для наступної сторінки
+    if (!hasTokenForPage(nextPage)) return;
+
+    const pageToken = getPageToken(nextPage);
+    const res = await getEmployees(pageToken);
+
+    if (res !== null) {
+      const { items, nextToken } = res;
+      setEmployee(items);
+      setCurrentPage(nextPage);
+
+      // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+      if (nextToken) {
+        await verifyAndSetNextToken(nextToken, nextPage + 1);
       }
     }
   }
 
   async function prevPageEmployees() {
-    if (!isEmptyTokenList.value) {
-      const page = currentPage.value - 1 <= 0 ? 1 : currentPage.value - 1;
-      const nextToken = page > 1 ? getPageToken(page) : null;
-      const res = await getEmployees(nextToken);
+    if (currentPage.value <= 1) return;
 
-      if (res !== null) {
-        const { items } = res;
-        setEmployee(items);
-      }
-      setCurrentPage(page);
-      // setTokenToList(token, page);
+    const prevPage = currentPage.value - 1;
+    const pageToken = getPageToken(prevPage);
+    const res = await getEmployees(pageToken);
+
+    if (res !== null) {
+      const { items } = res;
+      setEmployee(items);
+      setCurrentPage(prevPage);
     }
   }
 
@@ -97,10 +107,7 @@ export function useEmployee() {
     } else {
       const pageIndex = tokenTypeList.findIndex((elem) => elem.page === page);
 
-      if (
-        pageIndex !== -1 &&
-        tokenTypeList[pageIndex] !== undefined
-      ) {
+      if (pageIndex !== -1 && tokenTypeList[pageIndex] !== undefined) {
         tokenTypeList[pageIndex].nextToken = token;
       } else {
         tokenList.value[tokenType.value]!.push({
@@ -109,6 +116,37 @@ export function useEmployee() {
         });
       }
     }
+
+    // Примусово тригеримо реактивність для вкладених змін
+    triggerRef(tokenList);
+  }
+
+  function removeTokenToList(page: number): boolean {
+    if (!tokenList.value) return false;
+    const tokenTypeList = tokenList.value[tokenType.value];
+
+    if (!tokenTypeList) return false;
+
+    const pageIndex = tokenTypeList.findIndex((elem) => elem.page === page);
+
+    if (pageIndex !== -1) {
+      tokenTypeList.splice(pageIndex, 1);
+      triggerRef(tokenList);
+      return true;
+    }
+    return false;
+  }
+
+  // Інвалідувати (видалити) всі токени для сторінок > page
+  function invalidateTokensFrom(page: number) {
+    if (!tokenList.value) return;
+    const tokenTypeList = tokenList.value[tokenType.value];
+    if (!tokenTypeList) return;
+
+    // Видаляємо всі токени для сторінок більших за page
+    tokenList.value[tokenType.value] = tokenTypeList.filter((elem) => elem.page <= page);
+
+    triggerRef(tokenList);
   }
 
   async function getFavouritesEmployees(token?: string) {
@@ -168,6 +206,22 @@ export function useEmployee() {
     currentPage.value = value;
   }
 
+  // Перевіряємо чи наступна сторінка має елементи перед збереженням токена
+  async function verifyAndSetNextToken(nextToken: string | null, forPage: number): Promise<boolean> {
+    if (!nextToken) return false;
+
+    // Робимо запит щоб перевірити чи є елементи на наступній сторінці
+    const res = await getEmployees(nextToken);
+
+    if (res !== null && res.items.length > 0) {
+      // Є елементи — зберігаємо токен
+      setTokenToList(nextToken, forPage);
+      return true;
+    }
+
+    // Немає елементів — не зберігаємо токен
+    return false;
+  }
 
   return {
     employees,
@@ -184,6 +238,10 @@ export function useEmployee() {
     setTokenToList,
     getPageToken,
     setCurrentPage,
-    setEmployee
+    setEmployee,
+    removeTokenToList,
+    invalidateTokensFrom,
+    hasTokenForPage,
+    verifyAndSetNextToken
   };
 }
