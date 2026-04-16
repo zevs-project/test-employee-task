@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Card, Select, InputText, Button } from 'primevue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import type { CreateEmployeeInput } from '@/API';
 import type { TPosition, TPositionKeys } from '@/types/TPosition.ts';
 

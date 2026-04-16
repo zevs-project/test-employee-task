@@ -4,10 +4,9 @@ import '@aws-amplify/ui-vue/styles.css';
 import { Button } from 'primevue';
 import 'primeicons/primeicons.css';
 import { EmployeeView } from '@/components/Employee/index';
+import { usePositionStore } from '@/stores/PositionStore';
 
-import type { TPosition } from '@/types/TPosition.ts';
-
-const positions: TPosition = ['Developer', 'PM', 'Delivery', 'TL'];
+const { positions } = usePositionStore();
 </script>
 
 <template>

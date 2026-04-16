@@ -10,10 +10,9 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     tokenList,
     useFilter,
     getEmployees,
-    updateFavoriteAction,
+    updateEmployeeAction,
     deleteEmployeeAction,
     createEmployeeAction,
-    getFavouritesEmployees,
     subscribeToEmployees,
     nextPageEmployees,
     prevPageEmployees,
@@ -25,13 +24,14 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     hasTokenForPage,
     verifyAndSetNextToken,
     toggleShowUseFilter,
-    clearTokenList
+    clearTokenList,
 
   } = useEmployee();
 
   const isLoading = ref(false);
   const showFavourites = ref(false);
   let unsubscribe: (() => void) | null = null;
+
 
   const isNextActive = computed(() => {
     return hasTokenForPage(currentPage.value + 1);
@@ -77,22 +77,32 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       isLoading.value = false;
     }
   }
-
-  async function fetchFavouritesEmployees(token?: string) {
-    isLoading.value = true;
-    try {
-      await getFavouritesEmployees(token);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function toggleFavouriteAction(data: Employee) {
+  async function toggleFavourite(data: Employee) {
     const input: UpdateEmployeeInput = {
       id: data.id,
       isFavourite: data.isFavourite === 'true' ? 'false' : 'true'
     };
-    await updateFavoriteAction(input);
+    await updateEmployeeAction(input);
+  }
+
+  async function updateEmployee(data: Employee) {
+    const input: UpdateEmployeeInput = {
+      id: data.id,
+    };
+
+    if(data.name) {
+      input.name = data.name;
+    }
+
+    if(data.position) {
+      input.position = data.position;
+    }
+
+    if(data.isFavourite) {
+      input.isFavourite = data.isFavourite;
+    }
+    const res = await updateEmployeeAction(input);
+    console.log(res, 'update');
   }
 
   async function removeEmployee(id: string) {
@@ -176,9 +186,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     }
   }
 
-  function toggleFavourites() {
-    showFavourites.value = !showFavourites.value;
-  }
 
   watch(tokenList, () => {
     console.log('tokenList changed:', tokenList.value);
@@ -203,7 +210,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     useFilter,
     tokenList,
     fetchEmployees,
-    toggleFavouriteAction,
+    toggleFavourite,
     removeEmployee,
     addEmployeeAction,
     initSubscriptions,
@@ -211,6 +218,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     fetchNextEmployees,
     fetchPrevEmployees,
     toggleShowUseFilter,
-    clearTokenList
+    clearTokenList,
+    updateEmployee,
   };
 });

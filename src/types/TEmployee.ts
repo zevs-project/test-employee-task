@@ -7,9 +7,9 @@ export type IEmployee = {
 
 export type TIFavourite = 'true' | 'false';
 
-export interface IIsEmpty {
-  isEmpty: boolean;
-  nextToken: string | null;
+export interface IEmployeeEdit {
+  id: string;
+  data: Employee;
 }
 
 export interface IVariables {

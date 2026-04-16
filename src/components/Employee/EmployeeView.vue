@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import type { CreateEmployeeInput } from '@/API';
+import type { CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
 import { EmployeeList, EmployeeCreate, EmployeeTopMenu } from '@/components/Employee/index';
 import type { TPosition } from '@/types/TPosition';
@@ -55,7 +55,8 @@ onUnmounted(() => {
     <EmployeeList
       :employees="employeeStore.employees"
       :positions="positions"
-      @toggle-favourite="(data) => employeeStore.toggleFavouriteAction(data)"
+      @toggle-favourite="(data) => employeeStore.toggleFavourite(data)"
+      @update="(data) => employeeStore.updateEmployee(data)"
       @remove="employeeStore.removeEmployee"
       @next-page="employeeStore.fetchNextEmployees"
       @prev-page="employeeStore.fetchPrevEmployees"

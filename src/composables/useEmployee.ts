@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { computed, ref, triggerRef } from 'vue';
+import { ref, triggerRef } from 'vue';
 import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from '@/API';
 import { employeesByFavourite, listEmployees } from '@/graphql/queries.ts';
 import { updateEmployee, deleteEmployee, createEmployee } from '@/graphql/mutations';
@@ -162,7 +162,7 @@ export function useEmployee() {
     employees.value = items.filter((item: Employee): item is Employee => !!item);
   }
 
-  async function updateFavoriteAction(input: UpdateEmployeeInput) {
+  async function updateEmployeeAction(input: UpdateEmployeeInput) {
     try {
       await API.graphql(graphqlOperation(updateEmployee, { input }));
     } catch (error) {
@@ -237,11 +237,10 @@ export function useEmployee() {
     currentPage,
     useFilter,
     getEmployees,
-    updateFavoriteAction,
+    updateEmployeeAction,
     deleteEmployeeAction,
     createEmployeeAction,
     subscribeToEmployees,
-    getFavouritesEmployees,
     prevPageEmployees,
     nextPageEmployees,
     getPageToken,
