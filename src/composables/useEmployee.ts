@@ -7,7 +7,7 @@ import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/
 import { API, graphqlOperation } from 'aws-amplify';
 import type { TokensMap, TTokenType } from '@/types/TPosition.ts';
 import type { IEmployee, IVariables } from '@/types/TEmployee';
-import type { ToastMessageOptions } from 'primevue/toast';
+import { useNotify } from '@/composables/useNotify.ts';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
@@ -16,10 +16,10 @@ export function useEmployee() {
   const currentPage = ref(1);
   const useFilter = ref(false);
   const searchTerm = ref('');
-  const isVisibleInfoPopup = ref(false);
-  const toastMessage = ref<ToastMessageOptions['severity']>(undefined)
   // const canUseLambdaSearch = ref(!(typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)));
   const canUseLambdaSearch = ref(true);
+
+  const { show } = useNotify();
 
   function resolveTokenType(): TTokenType {
     if (searchTerm.value.trim().length > 0) {
@@ -89,13 +89,13 @@ export function useEmployee() {
 
     const variables: IVariables = {
       limit: queryLimit,
-      nextToken: token,
+      nextToken: token
     };
 
     const query = useFilter.value ? employeesByFavourite : listEmployees;
 
-    if(useFilter.value) {
-      variables.isFavourite =  'true'
+    if (useFilter.value) {
+      variables.isFavourite = 'true';
     }
     const response = (await API.graphql({
       query: query,
@@ -235,8 +235,10 @@ export function useEmployee() {
   async function updateEmployeeAction(input: UpdateEmployeeInput) {
     try {
       await API.graphql(graphqlOperation(updateEmployee, { input }));
+      show('T_UPDATE');
     } catch (error) {
       console.error('Error updated employee:', error);
+      show('T_ERROR');
     }
   }
 
@@ -244,16 +246,20 @@ export function useEmployee() {
     try {
       const res = await API.graphql(graphqlOperation(deleteEmployee, { input: { id } }));
       console.log(res, 'delete');
+      show('T_DELETE');
     } catch (error) {
       console.error('Error updated employee:', error);
+      show('T_ERROR');
     }
   }
 
   async function createEmployeeAction(input: CreateEmployeeInput) {
     try {
       await API.graphql(graphqlOperation(createEmployee, { input }));
+      show('T_CREATE');
     } catch (error) {
       console.error('Error creating employee:', error);
+      show('T_ERROR');
     }
   }
 
@@ -305,22 +311,12 @@ export function useEmployee() {
     searchTerm.value = value.trim();
   }
 
-  function showInfoPopup() {
-    isVisibleInfoPopup.value = true;
-  }
-
-  function closeInfoPopup() {
-    isVisibleInfoPopup.value = false;
-  }
-
   return {
     employees,
     tokenList,
     currentPage,
     useFilter,
     searchTerm,
-    isVisibleInfoPopup,
-    toastMessage,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -337,8 +333,6 @@ export function useEmployee() {
     verifyAndSetNextToken,
     toggleShowUseFilter,
     clearTokenList,
-    setSearchTerm,
-    showInfoPopup,
-    closeInfoPopup
+    setSearchTerm
   };
 }

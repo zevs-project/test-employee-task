@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useEmployee } from '@/composables/useEmployee';
+import { useNotify } from '@/composables/useNotify.ts';
 import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
 
 export const useEmployeeStore = defineStore('EmployeeStore', () => {
@@ -10,8 +11,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     tokenList,
     useFilter,
     searchTerm,
-    isVisibleInfoPopup,
-    toastMessage,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -28,11 +27,12 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     verifyAndSetNextToken,
     toggleShowUseFilter,
     clearTokenList,
-    setSearchTerm,
-    showInfoPopup,
-    closeInfoPopup,
+    setSearchTerm
 
   } = useEmployee();
+
+  const { show } = useNotify();
+
 
   const isLoading = ref(false);
   const showFavourites = ref(false);
@@ -84,18 +84,19 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       isLoading.value = false;
     }
   }
+
   async function toggleFavourite(data: Employee) {
     const input: UpdateEmployeeInput = {
       id: data.id,
       isFavourite: data.isFavourite === 'true' ? 'false' : 'true'
     };
     await updateEmployeeAction(input);
-    showInfoPopup()
+    show('T_TOGGLE');
   }
 
   async function updateEmployee(data: Employee) {
     const input: UpdateEmployeeInput = {
-      id: data.id,
+      id: data.id
     };
 
     if (data.name) {
@@ -208,8 +209,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     useFilter,
     searchTerm,
     tokenList,
-    isVisibleInfoPopup,
-    toastMessage,
     fetchEmployees,
     toggleFavourite,
     removeEmployee,
@@ -221,8 +220,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     toggleShowUseFilter,
     clearTokenList,
     updateEmployee,
-    searchEmployees,
-    showInfoPopup,
-    closeInfoPopup
+    searchEmployees
   };
 });
