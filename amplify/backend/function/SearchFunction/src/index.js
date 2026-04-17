@@ -5,6 +5,14 @@ const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb")
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
+function getCorsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "*",
+    "Access-Control-Allow-Methods": "GET,OPTIONS"
+  };
+}
+
 /**
  * @type {import('@types/aws-lambda').APIGatewayProxyHandler}
  */
@@ -23,10 +31,7 @@ exports.handler = async (event) => {
     } catch {
       return {
         statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "*"
-        },
+        headers: getCorsHeaders(),
         body: JSON.stringify({ message: "Invalid nextKey" })
       };
     }
@@ -35,10 +40,7 @@ exports.handler = async (event) => {
   if (!tableName) {
     return {
       statusCode: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*"
-      },
+      headers: getCorsHeaders(),
       body: JSON.stringify({ message: "Table name is not configured" })
     };
   }
@@ -46,10 +48,7 @@ exports.handler = async (event) => {
   if (!searchTerm) {
     return {
       statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*"
-      },
+      headers: getCorsHeaders(),
       body: JSON.stringify({ message: "Search term is required" })
     };
   }
@@ -72,10 +71,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*"
-      },
+      headers: getCorsHeaders(),
       body: JSON.stringify({
         items: data.Items ?? [],
         nextKey: data.LastEvaluatedKey
@@ -87,10 +83,7 @@ exports.handler = async (event) => {
     console.error(err);
     return {
       statusCode: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*"
-      },
+      headers: getCorsHeaders(),
       body: JSON.stringify({ error: err?.message || "Internal server error" })
     };
   }

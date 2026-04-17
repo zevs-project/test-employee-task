@@ -1,5 +1,19 @@
 {
   "api": {
+    "SearchFunction": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "SearchFunction"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "testemployeetask": {
       "dependsOn": [],
       "output": {
@@ -43,6 +57,42 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "SearchFunction": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "testemployeetask"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_SearchFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SearchFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_SearchFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SearchFunction"
+        }
+      ]
     }
   }
 }

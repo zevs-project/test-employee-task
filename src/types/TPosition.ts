@@ -2,7 +2,7 @@ export type TPosition = ['Developer', 'PM', 'Delivery', 'TL'];
 
 export type TPositionKeys = keyof TPosition;
 
-export type TTokenType = 'global' | 'isFavourite';
+export type TTokenType = 'global' | 'isFavourite' | 'search';
 
 export interface INextToken {
   nextToken: string | null,

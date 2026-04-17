@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import type { CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
+import type { CreateEmployeeInput } from '@/API';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
 import { EmployeeList, EmployeeCreate, EmployeeTopMenu } from '@/components/Employee/index';
 import type { TPosition } from '@/types/TPosition';
@@ -19,6 +19,10 @@ function showFavouritesEmployee() {
   employeeStore.toggleShowUseFilter();
   employeeStore.clearTokenList();
   employeeStore.fetchEmployees(null);
+}
+
+async function onSearchEmployee(term: string) {
+  await employeeStore.searchEmployees(term);
 }
 
 function showCreateDialog() {
@@ -40,6 +44,7 @@ onUnmounted(() => {
     <EmployeeTopMenu
       @show-favourites-employee="showFavouritesEmployee"
       @add-employee="showCreateDialog"
+      @search-employee="onSearchEmployee"
       :is-show-favourites="employeeStore.useFilter"
     ></EmployeeTopMenu>
 

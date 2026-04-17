@@ -13,10 +13,69 @@ export function useEmployee() {
   const queryLimit = 3;
   const tokenList = ref<TokensMap | null>(null);
   const currentPage = ref(1);
-  const tokenType = ref<TTokenType>('global');
   const useFilter = ref(false);
+  const searchTerm = ref('');
+
+  function resolveTokenType(): TTokenType {
+    if (searchTerm.value.trim().length > 0) {
+      return 'search';
+    }
+
+    return useFilter.value ? 'isFavourite' : 'global';
+  }
+
+  async function getEmployeesByGraphQLNameSearch(token: string | null): Promise<IEmployee | null> {
+    const response = (await API.graphql({
+      query: listEmployees,
+      variables: {
+        limit: queryLimit,
+        nextToken: token,
+        filter: {
+          name: { contains: searchTerm.value.trim() }
+        }
+      }
+    })) as any;
+
+    const data = response.data.listEmployees;
+    const items = data.items || [];
+
+    return {
+      items,
+      nextToken: data.nextToken ?? null
+    };
+  }
+
+  async function getEmployeesBySearch(token: string | null): Promise<IEmployee | null> {
+    const queryStringParameters: Record<string, string> = {
+      term: searchTerm.value.trim(),
+      limit: String(queryLimit)
+    };
+
+    if (token) {
+      queryStringParameters.nextKey = token;
+    }
+
+    try {
+      const response = (await API.get('SearchFunction', '/search', {
+        queryStringParameters
+      })) as any;
+
+      return {
+        items: (response?.items || []).filter((item: Employee): item is Employee => !!item),
+        nextToken: response?.nextKey ?? null
+      };
+    } catch (error) {
+      // Localhost CORS / API Gateway auth failures should not break table updates.
+      console.warn('Lambda search failed, using GraphQL fallback:', error);
+      return getEmployeesByGraphQLNameSearch(token);
+    }
+  }
 
   async function getEmployees(token: string | null): Promise<IEmployee | null> {
+    if (searchTerm.value.trim().length > 0) {
+      return getEmployeesBySearch(token);
+    }
+
     const variables: IVariables = {
       limit: queryLimit,
       nextToken: token,
@@ -48,8 +107,10 @@ export function useEmployee() {
   function getPageToken(page: number): string | null {
     if (page === 1) return null;
 
-    if (tokenList.value !== null && tokenList.value?.[tokenType.value]) {
-      const currentTokenType = tokenList.value?.[tokenType.value];
+    const tokenType = resolveTokenType();
+
+    if (tokenList.value !== null && tokenList.value?.[tokenType]) {
+      const currentTokenType = tokenList.value?.[tokenType];
       const tokenEntry = currentTokenType?.find((elem) => elem.page === page);
       return tokenEntry?.nextToken ?? null;
     }
@@ -58,9 +119,10 @@ export function useEmployee() {
 
   function hasTokenForPage(page: number): boolean {
     if (page === 1) return true;
-    if (!tokenList.value || !tokenList.value[tokenType.value]) return false;
+    const tokenType = resolveTokenType();
+    if (!tokenList.value || !tokenList.value[tokenType]) return false;
 
-    const tokenEntry = tokenList.value[tokenType.value]?.find((elem) => elem.page === page);
+    const tokenEntry = tokenList.value[tokenType]?.find((elem) => elem.page === page);
     return tokenEntry !== undefined && tokenEntry.nextToken !== null;
   }
 
@@ -98,15 +160,17 @@ export function useEmployee() {
   }
 
   function setTokenToList(token: string | null, page: number) {
+    const tokenType = resolveTokenType();
+
     if (!tokenList.value) {
       tokenList.value = {};
     }
 
-    const tokenTypeList = tokenList.value[tokenType.value];
+    const tokenTypeList = tokenList.value[tokenType];
 
     if (!tokenTypeList) {
-      tokenList.value[tokenType.value] = [];
-      tokenList.value[tokenType.value]!.push({
+      tokenList.value[tokenType] = [];
+      tokenList.value[tokenType]!.push({
         nextToken: token,
         page
       });
@@ -116,7 +180,7 @@ export function useEmployee() {
       if (pageIndex !== -1 && tokenTypeList[pageIndex] !== undefined) {
         tokenTypeList[pageIndex].nextToken = token;
       } else {
-        tokenList.value[tokenType.value]!.push({
+        tokenList.value[tokenType]!.push({
           nextToken: token,
           page
         });
@@ -127,8 +191,10 @@ export function useEmployee() {
   }
 
   function removeTokenToList(page: number): boolean {
+    const tokenType = resolveTokenType();
+
     if (!tokenList.value) return false;
-    const tokenTypeList = tokenList.value[tokenType.value];
+    const tokenTypeList = tokenList.value[tokenType];
 
     if (!tokenTypeList) return false;
 
@@ -143,24 +209,17 @@ export function useEmployee() {
   }
 
   function invalidateTokensFrom(page: number) {
+    const tokenType = resolveTokenType();
+
     if (!tokenList.value) return;
-    const tokenTypeList = tokenList.value[tokenType.value];
+    const tokenTypeList = tokenList.value[tokenType];
     if (!tokenTypeList) return;
 
-    tokenList.value[tokenType.value] = tokenTypeList.filter((elem) => elem.page <= page);
+    tokenList.value[tokenType] = tokenTypeList.filter((elem) => elem.page <= page);
 
     triggerRef(tokenList);
   }
 
-  async function getFavouritesEmployees(token?: string) {
-    const response = (await API.graphql({
-      query: employeesByFavourite,
-      variables: { limit: queryLimit, isFavourite: 'true', nextToken: token }
-    })) as any;
-
-    const items = response.data.listEmployees.items || [];
-    employees.value = items.filter((item: Employee): item is Employee => !!item);
-  }
 
   async function updateEmployeeAction(input: UpdateEmployeeInput) {
     try {
@@ -231,11 +290,16 @@ export function useEmployee() {
     currentPage.value = 1;
   }
 
+  function setSearchTerm(value: string) {
+    searchTerm.value = value.trim();
+  }
+
   return {
     employees,
     tokenList,
     currentPage,
     useFilter,
+    searchTerm,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -251,6 +315,7 @@ export function useEmployee() {
     hasTokenForPage,
     verifyAndSetNextToken,
     toggleShowUseFilter,
-    clearTokenList
+    clearTokenList,
+    setSearchTerm
   };
 }

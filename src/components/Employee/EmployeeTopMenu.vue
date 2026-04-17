@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import InputText from 'primevue/inputtext';
 import { Button } from 'primevue';
 
@@ -13,7 +13,26 @@ const showFavouritesButtonLabel = computed(() => props.isShowFavourites ? 'Hide 
 const emit = defineEmits<{
   (e: 'addEmployee'): void
   (e: 'showFavouritesEmployee'): void
+  (e: 'searchEmployee', value: string): void
 }>();
+
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(searchText, (value) => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+
+  searchDebounceTimer = setTimeout(() => {
+    emit('searchEmployee', value);
+  }, 400);
+});
+
+onBeforeUnmount(() => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+});
 
 function emitAddEmployee() {
   emit('addEmployee');

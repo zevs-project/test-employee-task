@@ -9,6 +9,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     currentPage,
     tokenList,
     useFilter,
+    searchTerm,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -25,6 +26,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     verifyAndSetNextToken,
     toggleShowUseFilter,
     clearTokenList,
+    setSearchTerm,
 
   } = useEmployee();
 
@@ -49,12 +51,13 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
         const { items, nextToken } = res;
         setEmployee(items);
 
-        console.log(items, 'items 11212');
-
         if (nextToken) {
           await verifyAndSetNextToken(nextToken, currentPage.value + 1);
         }
       }
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+      setEmployee([]);
     } finally {
       isLoading.value = false;
     }
@@ -90,23 +93,21 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       id: data.id,
     };
 
-    if(data.name) {
+    if (data.name) {
       input.name = data.name;
     }
 
-    if(data.position) {
+    if (data.position) {
       input.position = data.position;
     }
 
-    if(data.isFavourite) {
+    if (data.isFavourite) {
       input.isFavourite = data.isFavourite;
     }
-    const res = await updateEmployeeAction(input);
-    console.log(res, 'update');
+    await updateEmployeeAction(input);
   }
 
   async function removeEmployee(id: string) {
-    console.log('Removing employee with ID:', id);
     await deleteEmployeeAction(id);
   }
 
@@ -186,6 +187,12 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     }
   }
 
+  async function searchEmployees(term: string) {
+    setSearchTerm(term);
+    clearTokenList();
+    await fetchEmployees(null);
+  }
+
 
   watch(tokenList, () => {
     console.log('tokenList changed:', tokenList.value);
@@ -208,6 +215,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     isNextActive,
     isPrevActive,
     useFilter,
+    searchTerm,
     tokenList,
     fetchEmployees,
     toggleFavourite,
@@ -220,5 +228,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     toggleShowUseFilter,
     clearTokenList,
     updateEmployee,
+    searchEmployees
   };
 });
