@@ -7,6 +7,7 @@ import { onCreateEmployee, onUpdateEmployee, onDeleteEmployee } from '@/graphql/
 import { API, graphqlOperation } from 'aws-amplify';
 import type { TokensMap, TTokenType } from '@/types/TPosition.ts';
 import type { IEmployee, IVariables } from '@/types/TEmployee';
+import type { ToastMessageOptions } from 'primevue/toast';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
@@ -15,6 +16,8 @@ export function useEmployee() {
   const currentPage = ref(1);
   const useFilter = ref(false);
   const searchTerm = ref('');
+  const isVisibleInfoPopup = ref(false);
+  const toastMessage = ref<ToastMessageOptions['severity']>(undefined)
   // const canUseLambdaSearch = ref(!(typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)));
   const canUseLambdaSearch = ref(true);
 
@@ -65,6 +68,8 @@ export function useEmployee() {
       const response = (await API.get('SearchFunction', '/search', {
         queryStringParameters
       })) as any;
+
+      console.log(response, 'response');
 
       return {
         items: (response?.items || []).filter((item: Employee): item is Employee => !!item),
@@ -300,12 +305,22 @@ export function useEmployee() {
     searchTerm.value = value.trim();
   }
 
+  function showInfoPopup() {
+    isVisibleInfoPopup.value = true;
+  }
+
+  function closeInfoPopup() {
+    isVisibleInfoPopup.value = false;
+  }
+
   return {
     employees,
     tokenList,
     currentPage,
     useFilter,
     searchTerm,
+    isVisibleInfoPopup,
+    toastMessage,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -322,6 +337,8 @@ export function useEmployee() {
     verifyAndSetNextToken,
     toggleShowUseFilter,
     clearTokenList,
-    setSearchTerm
+    setSearchTerm,
+    showInfoPopup,
+    closeInfoPopup
   };
 }

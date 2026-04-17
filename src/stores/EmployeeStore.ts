@@ -10,6 +10,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     tokenList,
     useFilter,
     searchTerm,
+    isVisibleInfoPopup,
+    toastMessage,
     getEmployees,
     updateEmployeeAction,
     deleteEmployeeAction,
@@ -27,6 +29,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     toggleShowUseFilter,
     clearTokenList,
     setSearchTerm,
+    showInfoPopup,
+    closeInfoPopup,
 
   } = useEmployee();
 
@@ -86,6 +90,7 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
       isFavourite: data.isFavourite === 'true' ? 'false' : 'true'
     };
     await updateEmployeeAction(input);
+    showInfoPopup()
   }
 
   async function updateEmployee(data: Employee) {
@@ -203,6 +208,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     useFilter,
     searchTerm,
     tokenList,
+    isVisibleInfoPopup,
+    toastMessage,
     fetchEmployees,
     toggleFavourite,
     removeEmployee,
@@ -214,6 +221,8 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     toggleShowUseFilter,
     clearTokenList,
     updateEmployee,
-    searchEmployees
+    searchEmployees,
+    showInfoPopup,
+    closeInfoPopup
   };
 });
