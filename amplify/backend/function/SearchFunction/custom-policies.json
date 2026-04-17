@@ -1,6 +1,14 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "dynamodb:GetItem",
+      "dynamodb:DescribeTable"
+    ],
+    "Resource": [
+      "arn:aws:dynamodb:*:*:table/Employee-*",
+      "arn:aws:dynamodb:*:*:table/Employee-*/index/*"
+    ]
   }
 ]

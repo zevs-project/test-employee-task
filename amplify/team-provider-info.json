@@ -23,7 +23,7 @@
       "function": {
         "SearchFunction": {
           "deploymentBucketName": "amplify-testemployeetask-dev-2436f-deployment",
-          "s3Key": "amplify-builds/SearchFunction-356a4171426473416a37-build.zip"
+          "s3Key": "amplify-builds/SearchFunction-50385463536d6f6a5368-build.zip"
         }
       }
     }

@@ -133,7 +133,7 @@ function getEditComponent(): Employee | null {
                   variant="text"
                   severity="secondary"
                   v-show="isEdit(slotProps.data.id)"
-                  @click="saveEmployee(slotProps.data)"
+                  @click="saveEmployee()"
                   rounded
                 />
 

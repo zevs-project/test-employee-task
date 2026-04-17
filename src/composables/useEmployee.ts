@@ -10,12 +10,13 @@ import type { IEmployee, IVariables } from '@/types/TEmployee';
 
 export function useEmployee() {
   const employees = ref<Employee[]>([]);
-  const queryLimit = 3;
+  const queryLimit = 5;
   const tokenList = ref<TokensMap | null>(null);
   const currentPage = ref(1);
   const useFilter = ref(false);
   const searchTerm = ref('');
-  const canUseLambdaSearch = ref(!(typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)));
+  // const canUseLambdaSearch = ref(!(typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)));
+  const canUseLambdaSearch = ref(true);
 
   function resolveTokenType(): TTokenType {
     if (searchTerm.value.trim().length > 0) {
