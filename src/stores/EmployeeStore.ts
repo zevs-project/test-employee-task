@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useEmployee } from '@/composables/useEmployee';
 import type { Employee, CreateEmployeeInput, UpdateEmployeeInput } from '@/API';
@@ -192,20 +192,6 @@ export const useEmployeeStore = defineStore('EmployeeStore', () => {
     clearTokenList();
     await fetchEmployees(null);
   }
-
-
-  watch(tokenList, () => {
-    console.log('tokenList changed:', tokenList.value);
-  }, {
-    immediate: true,
-    deep: true
-  });
-
-  watch(currentPage, (newCurrentPage) => {
-    console.log('currentPage changed:', newCurrentPage);
-  }, {
-    immediate: true
-  });
 
   return {
     employees,

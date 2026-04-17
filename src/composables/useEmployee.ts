@@ -15,6 +15,7 @@ export function useEmployee() {
   const currentPage = ref(1);
   const useFilter = ref(false);
   const searchTerm = ref('');
+  const canUseLambdaSearch = ref(!(typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)));
 
   function resolveTokenType(): TTokenType {
     if (searchTerm.value.trim().length > 0) {
@@ -46,6 +47,10 @@ export function useEmployee() {
   }
 
   async function getEmployeesBySearch(token: string | null): Promise<IEmployee | null> {
+    if (!canUseLambdaSearch.value) {
+      return getEmployeesByGraphQLNameSearch(token);
+    }
+
     const queryStringParameters: Record<string, string> = {
       term: searchTerm.value.trim(),
       limit: String(queryLimit)
@@ -65,8 +70,8 @@ export function useEmployee() {
         nextToken: response?.nextKey ?? null
       };
     } catch (error) {
-      // Localhost CORS / API Gateway auth failures should not break table updates.
-      console.warn('Lambda search failed, using GraphQL fallback:', error);
+      // Disable Lambda search after first failure to avoid repeated browser network/CORS errors.
+      canUseLambdaSearch.value = false;
       return getEmployeesByGraphQLNameSearch(token);
     }
   }
